@@ -18,9 +18,10 @@
     body { margin:0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
     a { color: inherit; text-decoration: none; }
     header { text-align: center; padding: 20px 0; }
-    header img { height: 80px; border-radius: 10px; }
-    .btn { display:inline-block; padding: 12px 18px; border-radius: 14px; font-weight: 700; }
+    header img { height: 100px; border-radius: 14px; box-shadow: 0 0 10px rgba(0,0,0,0.3); }
+    .btn { display:inline-block; padding: 12px 18px; border-radius: 14px; font-weight: 700; transition: all 0.3s; }
     .btn-accent { background: var(--accent); color: var(--accentText); }
+    .btn-accent:hover { opacity: 0.9; }
     .btn-outline { border: 1px solid var(--text); }
     .grid { display: grid; gap: 24px; }
     @media (min-width: 768px) {
@@ -30,12 +31,14 @@
     input { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--muted); color: var(--text); border-radius: 12px; }
     label { font-size: 12px; opacity: .85; display:block; margin-bottom: 6px; }
     .section { padding: 64px 0; text-align:center; }
+    footer { padding:20px;text-align:center;font-size:14px;opacity:.8; }
   </style>
 </head>
 <body>
-  <header><img src="logo-evtc66.jpg" alt="Logo Express VTC 66" />
+  <header>
+    <img src="data:image/jpeg;base64,LOGO_ENCODE_HERE" alt="Logo Express VTC 66" />
     <h1>Express VTC 66</h1>
-    <p>Votre chauffeur privé basé à Perpignan, disponible pour tous vos trajets et longues distances.</p>
+    <p>Votre chauffeur privé <strong>basé à Perpignan</strong>, disponible pour tous vos trajets locaux ou longues distances, avec un service professionnel et ponctuel.</p>
     <div style="margin-top: 18px;">
       <a class="btn btn-accent" href="https://wa.me/33685618983" target="_blank">Réserver sur WhatsApp</a>
       <a class="btn btn-outline" href="tel:+33685618983">Appeler</a>
@@ -47,7 +50,7 @@
     <section class="section">
       <div class="container">
         <h2>Réservation rapide</h2>
-        <p>Remplissez le formulaire ci-dessous pour obtenir une estimation et réserver votre trajet.</p>
+        <p>Remplissez le formulaire ci-dessous pour obtenir une estimation automatique et réserver votre trajet.</p>
         <div class="card" style="max-width:500px;margin:auto;">
           <form id="booking-form">
             <div class="grid grid-2">
@@ -93,13 +96,12 @@
     </section>
   </main>
 
-  <footer style="padding:20px;text-align:center;font-size:14px;opacity:.8;">
+  <footer>
     © 2025 Express VTC 66 – Basé à Perpignan – Chauffeur privé toutes distances.
   </footer>
 
   <script>
-    // 🔒 Formule de calcul tarif (cachée dans le code)
-    // Tarif = 20€ jusqu'à 7 km, puis 1.60€/km au-delà
+    // 🔒 Formule tarif cachée : 20€ jusqu'à 7 km, puis 1,60€/km au-delà
     function estimateFare(km) {
       var d = Math.max(0, Number(km) || 0);
       if (d <= 7) return 20;
