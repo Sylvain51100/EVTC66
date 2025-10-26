@@ -48,7 +48,7 @@
     .grid { display: grid; gap: 24px; }
     @media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
     .card { background: var(--card); border: 1px solid var(--muted); border-radius: 20px; padding: 24px; }
-    input, textarea { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--muted); color: var(--text); border-radius: 12px; }
+    input, textarea, select { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--muted); color: var(--text); border-radius: 12px; }
     label { font-size: 12px; opacity: .85; display:block; margin-bottom: 6px; }
     .section { padding: 56px 0; text-align:center; }
     .muted { opacity: .8; }
@@ -107,9 +107,30 @@
             <input id="to" name="to" required placeholder="Adresse d'arrivée" autocomplete="address-line1" />
           </div>
 
+          <!-- ✅ Nombre de passagers + Paiement -->
+          <div class="grid grid-2" style="margin-top:12px;">
+            <div>
+              <label for="passengers">Nombre de passagers</label>
+              <select id="passengers" name="passengers" required>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4 (max)</option>
+              </select>
+            </div>
+            <div>
+              <label for="payment">Mode de paiement</label>
+              <select id="payment" name="payment" required>
+                <option value="CB à bord">CB à bord</option>
+                <option value="Lien CB sécurisé">Lien CB sécurisé</option>
+                <option value="Espèces à bord">Espèces à bord</option>
+              </select>
+            </div>
+          </div>
+
           <div style="margin-top:12px;">
             <label for="distanceKm">Distance estimée (km)</label>
-            <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="ex. 12,5" inputmode="decimal" />
+            <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="ex. 12,5" inputmode="decimal" readonly />
           </div>
 
           <div class="card" style="padding: 12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
@@ -119,7 +140,7 @@
           </div>
 
           <div id="routeMap" style="height:220px; margin-top:12px; border-radius:12px; overflow:hidden; display:none;"></div>
-<div id="routeStatus" class="muted" style="margin-top:8px; font-size:12px; display:none;"></div>
+          <div id="routeStatus" class="muted" style="margin-top:8px; font-size:12px; display:none;"></div>
 
           <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer sur WhatsApp</button>
         </form>
@@ -165,18 +186,16 @@
     }
 
     const distanceInput = document.getElementById('distanceKm');
-const estimateEl = document.getElementById('estimate');
-// Désactive la saisie manuelle : la distance est remplie automatiquement via Google Maps
-if (distanceInput) {
-  distanceInput.readOnly = true;
-  distanceInput.placeholder = 'Calcul automatique…';
-  distanceInput.title = 'La distance est calculée automatiquement à partir des adresses.';
-}
+    const estimateEl = document.getElementById('estimate');
+    if (distanceInput) {
+      distanceInput.readOnly = true;
+      distanceInput.placeholder = 'Calcul automatique…';
+      distanceInput.title = 'La distance est calculée automatiquement à partir des adresses.';
+    }
     const form = document.getElementById('booking-form');
     const dateInput = document.getElementById('date');
     const yearSpan = document.getElementById('year');
 
-    // Min date = aujourd'hui (heure locale du navigateur)
     (function setTodayMin() {
       const today = new Date();
       const yyyy = today.getFullYear();
@@ -192,9 +211,6 @@ if (distanceInput) {
       const price = estimateFare(km);
       estimateEl.textContent = formatEUR(price);
     }
-    // On ne met plus à jour sur saisie manuelle pour garder 0 € tant que la distance n'est pas calculée automatiquement
-// distanceInput.addEventListener('input', updateEstimate);
-// (pas d'updateEstimate() initial)
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -208,7 +224,6 @@ if (distanceInput) {
       const price = estimateFare(km);
       const priceTxt = formatEUR(price);
 
-      // Message WhatsApp (on encode tout le bloc)
       const raw = `Bonjour, je souhaite réserver un VTC :\n\n` +
                   `+ Nom : ${obj.name}\n` +
                   `+ Téléphone : ${obj.contact}\n` +
@@ -216,32 +231,14 @@ if (distanceInput) {
                   `+ Heure : ${obj.time}\n` +
                   `+ Départ : ${obj.from}\n` +
                   `+ Destination : ${obj.to}\n` +
+                  `+ Passagers : ${obj.passengers}\n` +
+                  `+ Paiement : ${obj.payment}\n` +
                   `+ Distance estimée : ${isNaN(km) ? '' : km.toFixed(1)} km\n` +
                   `+ Estimation tarifaire : ${priceTxt}`;
+
       const msg = encodeURIComponent(raw);
       window.open(`https://wa.me/33685618983?text=${msg}`, '_blank', 'noopener');
     });
-  </script>
-
-  <!-- JSON-LD Schema.org pour le SEO local -->
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "TaxiService",
-      "name": "Express VTC 66",
-      "areaServed": ["Perpignan", "Pyrénées-Orientales", "Occitanie", "France"],
-      "telephone": "+33 6 85 61 89 83",
-      "email": "contac@evtc66.fr",
-      "url": "https://evtc66.fr/",
-      "sameAs": ["https://wa.me/33685618983"],
-      "description": "Chauffeur VTC professionnel basé à Perpignan. Réservation simple par WhatsApp, téléphone ou e-mail. Estimation automatique.",
-      "priceRange": "€€",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Perpignan",
-        "addressCountry": "FR"
-      }
-    }
   </script>
 
   <!-- Google Maps + Places: auto-complétion des adresses et calcul distance -->
@@ -253,11 +250,10 @@ if (distanceInput) {
       const destInput = document.getElementById('to');
       const mapEl = document.getElementById('routeMap');
 
-      // Affiche la carte seulement si l'API est bien chargée
       if (mapEl) mapEl.style.display = 'block';
 
       const map = new google.maps.Map(mapEl, {
-        center: { lat: 42.6986, lng: 2.8956 }, // Perpignan
+        center: { lat: 42.6986, lng: 2.8956 },
         zoom: 11,
         disableDefaultUI: true
       });
@@ -284,8 +280,6 @@ if (distanceInput) {
         const originVal = originInput.value?.trim();
         const destVal = destInput.value?.trim();
         if (!originVal || !destVal) return;
-
-        // Prépare la requête Directions : si place_id dispo on l'utilise, sinon on retombe sur l'adresse textuelle
         const origin = gm.originPlaceId ? { placeId: gm.originPlaceId } : originVal;
         const destination = gm.destPlaceId ? { placeId: gm.destPlaceId } : destVal;
 
@@ -300,7 +294,6 @@ if (distanceInput) {
             const km = (leg.distance.value / 1000);
             const distanceInput = document.getElementById('distanceKm');
             distanceInput.value = km.toFixed(1);
-            // ⚠️ On ne met à jour l'estimation QUE lorsque la distance auto est calculée
             if (typeof updateEstimate === 'function') updateEstimate();
           }
         }).catch(err => {
@@ -308,84 +301,12 @@ if (distanceInput) {
         });
       }
 
-      // Déclenche aussi le calcul lorsqu'on quitte les champs (si l'utilisateur n'a pas cliqué dans les suggestions)
       const debounce = (fn, ms = 400) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
       originInput.addEventListener('blur', debounce(tryRoute, 300));
       destInput.addEventListener('blur', debounce(tryRoute, 300));
     }
   </script>
-  <!-- ⚠️ Protégez/vérrouillez votre clé par restrictions HTTP referrer dans la console Google Cloud -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
 
-  <noscript>
-    <div class="container" style="padding:12px 0 24px; text-align:center;">
-      Veuillez activer JavaScript pour calculer l'itinéraire et l'estimation automatiquement.
-    </div>
-  </noscript>
-<script>
-(function(){
-  const distanceInput = document.getElementById('distanceKm');
-  const estimateEl = document.getElementById('estimate');
-  const fromEl = document.getElementById('from');
-  const toEl = document.getElementById('to');
-  const statusEl = document.getElementById('routeStatus');
-
-  // Forcer l'estimation à 0 € au chargement
-  if (estimateEl) estimateEl.textContent = '0,00 €';
-  if (distanceInput) {
-    distanceInput.readOnly = true;
-    distanceInput.placeholder = 'Calcul automatique…';
-    distanceInput.title = 'La distance est calculée automatiquement à partir des adresses.';
-  }
-
-  function runCalc(){
-    const origin = fromEl?.value?.trim();
-    const dest = toEl?.value?.trim();
-    if (!origin || !dest || !window.google || !google.maps) return;
-    if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Calcul de l\'itinéraire…'; }
-
-    const ds = (window.gm && gm.directionsService) ? gm.directionsService : new google.maps.DirectionsService();
-    ds.route({ origin, destination: dest, travelMode: google.maps.TravelMode.DRIVING })
-      .then(res => {
-        const leg = res.routes?.[0]?.legs?.[0];
-        if (leg?.distance?.value) {
-          const km = leg.distance.value / 1000;
-          if (distanceInput) distanceInput.value = km.toFixed(1);
-          if (typeof updateEstimate === 'function') updateEstimate();
-          if (statusEl) statusEl.textContent = `Distance calculée : ${km.toFixed(1)} km.`;
-        } else {
-          fallback(origin, dest);
-        }
-      })
-      .catch(() => fallback(origin, dest));
-
-    function fallback(o, d){
-      const dm = (window.gm && gm.distanceMatrixService) ? gm.distanceMatrixService : new google.maps.DistanceMatrixService();
-      dm.getDistanceMatrix({
-        origins: [o],
-        destinations: [d],
-        travelMode: google.maps.TravelMode.DRIVING,
-        region: 'FR'
-      }, (resp, status) => {
-        if (status === 'OK') {
-          const meters = resp?.rows?.[0]?.elements?.[0]?.distance?.value;
-          if (typeof meters === 'number') {
-            const km = meters / 1000;
-            if (distanceInput) distanceInput.value = km.toFixed(1);
-            if (typeof updateEstimate === 'function') updateEstimate();
-            if (statusEl) statusEl.textContent = `Distance calculée : ${km.toFixed(1)} km (alternative).`;
-            return;
-          }
-        }
-        if (statusEl) statusEl.textContent = 'Impossible de calculer la distance. Vérifiez les adresses.';
-      });
-    }
-  }
-
-  const debounce = (fn, ms = 400) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
-  if (fromEl) fromEl.addEventListener('blur', debounce(runCalc, 300));
-  if (toEl) toEl.addEventListener('blur', debounce(runCalc, 300));
-})();
-</script>
 </body>
 </html>
