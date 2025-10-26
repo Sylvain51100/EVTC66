@@ -119,6 +119,7 @@
           </div>
 
           <div id="routeMap" style="height:220px; margin-top:12px; border-radius:12px; overflow:hidden; display:none;"></div>
+<div id="routeStatus" class="muted" style="margin-top:8px; font-size:12px; display:none;"></div>
 
           <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer sur WhatsApp</button>
         </form>
@@ -320,5 +321,70 @@ if (distanceInput) {
       Veuillez activer JavaScript pour calculer l'itinéraire et l'estimation automatiquement.
     </div>
   </noscript>
+<script>
+(function(){
+  const distanceInput = document.getElementById('distanceKm');
+  const estimateEl = document.getElementById('estimate');
+  const fromEl = document.getElementById('from');
+  const toEl = document.getElementById('to');
+  const statusEl = document.getElementById('routeStatus');
+
+  // Forcer l'estimation à 0 € au chargement
+  if (estimateEl) estimateEl.textContent = '0,00 €';
+  if (distanceInput) {
+    distanceInput.readOnly = true;
+    distanceInput.placeholder = 'Calcul automatique…';
+    distanceInput.title = 'La distance est calculée automatiquement à partir des adresses.';
+  }
+
+  function runCalc(){
+    const origin = fromEl?.value?.trim();
+    const dest = toEl?.value?.trim();
+    if (!origin || !dest || !window.google || !google.maps) return;
+    if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = 'Calcul de l\'itinéraire…'; }
+
+    const ds = (window.gm && gm.directionsService) ? gm.directionsService : new google.maps.DirectionsService();
+    ds.route({ origin, destination: dest, travelMode: google.maps.TravelMode.DRIVING })
+      .then(res => {
+        const leg = res.routes?.[0]?.legs?.[0];
+        if (leg?.distance?.value) {
+          const km = leg.distance.value / 1000;
+          if (distanceInput) distanceInput.value = km.toFixed(1).replace('.', ',');
+          if (typeof updateEstimate === 'function') updateEstimate();
+          if (statusEl) statusEl.textContent = `Distance calculée : ${km.toFixed(1)} km.`;
+        } else {
+          fallback(origin, dest);
+        }
+      })
+      .catch(() => fallback(origin, dest));
+
+    function fallback(o, d){
+      const dm = (window.gm && gm.distanceMatrixService) ? gm.distanceMatrixService : new google.maps.DistanceMatrixService();
+      dm.getDistanceMatrix({
+        origins: [o],
+        destinations: [d],
+        travelMode: google.maps.TravelMode.DRIVING,
+        region: 'FR'
+      }, (resp, status) => {
+        if (status === 'OK') {
+          const meters = resp?.rows?.[0]?.elements?.[0]?.distance?.value;
+          if (typeof meters === 'number') {
+            const km = meters / 1000;
+            if (distanceInput) distanceInput.value = km.toFixed(1).replace('.', ',');
+            if (typeof updateEstimate === 'function') updateEstimate();
+            if (statusEl) statusEl.textContent = `Distance calculée : ${km.toFixed(1)} km (alternative).`;
+            return;
+          }
+        }
+        if (statusEl) statusEl.textContent = 'Impossible de calculer la distance. Vérifiez les adresses.';
+      });
+    }
+  }
+
+  const debounce = (fn, ms = 400) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+  if (fromEl) fromEl.addEventListener('blur', debounce(runCalc, 300));
+  if (toEl) toEl.addEventListener('blur', debounce(runCalc, 300));
+})();
+</script>
 </body>
 </html>
