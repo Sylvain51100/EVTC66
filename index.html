@@ -87,26 +87,34 @@
               <input type="time" id="time" name="time" required />
             </div>
           </div>
-          <div style="margin-top:12px;">
-            <label for="from">Adresse de départ</label>
-            <input id="from" name="from" required placeholder="Adresse de départ" autocomplete="address-line1" />
+          $1
+          <div style="margin-top:6px;">
+            <button type="button" id="useMyLocation" class="btn btn-outline" style="padding:8px 12px;">📍 Utiliser ma position</button>
           </div>
-          <div style="margin-top:12px;">
-            <label for="to">Adresse d'arrivée</label>
-            <input id="to" name="to" required placeholder="Adresse d'arrivée" autocomplete="address-line1" />
+          $1
+          <div style="margin-top:12px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+            <label style="display:flex; gap:8px; align-items:center;">
+              <input type="checkbox" id="avoidHighways" /> Éviter autoroutes
+            </label>
+            <label style="display:flex; gap:8px; align-items:center;">
+              <input type="checkbox" id="avoidTolls" /> Éviter péages
+            </label>
           </div>
           <div style="margin-top:12px;">
             <label for="distanceKm">Distance estimée (km)</label>
-            <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="ex. 12,5" inputmode="decimal" />
+            <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="Calculée automatiquement…" inputmode="decimal" readonly title="Renseignée automatiquement après calcul Google Maps" />
           </div>
 
-          <div class="card" style="padding: 12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
+          <div id="estimateCard" class="card" style="padding: 12px; text-align:center; margin-top:12px; display:none;" aria-live="polite" aria-atomic="true">
             <div class="muted" style="font-size:12px;">Estimation</div>
+            <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">—</div>
+            <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par message</div>
+          </div>
             <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">0,00 €</div>
             <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par message</div>
           </div>
           <div id="routeMap" style="height:220px; margin-top:12px; border-radius:12px; overflow:hidden; display:none;"></div>
-          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer sur WhatsApp</button>
+          <button id="submitBtn" class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;" disabled>Envoyer sur WhatsApp</button>
         </form>
       </div>
     </section>
@@ -148,10 +156,12 @@
     }
 
     const distanceInput = document.getElementById('distanceKm');
+    const estimateCard = document.getElementById('estimateCard');
     const estimateEl = document.getElementById('estimate');
     const form = document.getElementById('booking-form');
     const dateInput = document.getElementById('date');
     const yearSpan = document.getElementById('year');
+    const submitBtn = document.getElementById('submitBtn');
 
     // Min date = aujourd'hui (heure locale du navigateur)
     (function setTodayMin() {
@@ -165,12 +175,20 @@
     })();
 
     function updateEstimate() {
-      const price = estimateFare(distanceInput.value);
+      const val = String(distanceInput.value || '').replace(',', '.');
+      const km = Number(val);
+      if (!isFinite(km) || km <= 0) {
+        estimateCard.style.display = 'none';
+        if (submitBtn) submitBtn.disabled = true;
+        return;
+      }
+      const price = estimateFare(km);
       estimateEl.textContent = formatEUR(price);
+      estimateCard.style.display = 'block';
+      if (submitBtn) submitBtn.disabled = false;
     }
 
     distanceInput.addEventListener('input', updateEstimate);
-    updateEstimate();
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -225,19 +243,22 @@
   
   <!-- Google Maps + Places: auto-complétion des adresses et calcul distance -->
   <script>
-    let gm = { originPlaceId: null, destPlaceId: null, directionsService: null, directionsRenderer: null };
+    let gm = { originPlaceId: null, originLatLng: null, destPlaceId: null, directionsService: null, directionsRenderer: null };
 
     function initMaps() {
       const originInput = document.getElementById('from');
       const destInput = document.getElementById('to');
       const mapEl = document.getElementById('routeMap');
+      const avoidHighwaysEl = document.getElementById('avoidHighways');
+      const avoidTollsEl = document.getElementById('avoidTolls');
+      const useMyLocationBtn = document.getElementById('useMyLocation');
 
-      // Affiche la carte seulement si l'API est bien chargée
       if (mapEl) mapEl.style.display = 'block';
 
       const map = new google.maps.Map(mapEl, { center: { lat: 42.6986, lng: 2.8956 }, zoom: 11, disableDefaultUI: true }); // Perpignan
       gm.directionsService = new google.maps.DirectionsService();
       gm.directionsRenderer = new google.maps.DirectionsRenderer({ map });
+      const geocoder = new google.maps.Geocoder();
 
       const acOptions = { componentRestrictions: { country: 'fr' }, fields: ['place_id', 'geometry', 'name', 'formatted_address'] };
       const originAC = new google.maps.places.Autocomplete(originInput, acOptions);
@@ -246,6 +267,7 @@
       originAC.addListener('place_changed', () => {
         const p = originAC.getPlace();
         gm.originPlaceId = p && p.place_id ? p.place_id : null;
+        gm.originLatLng = null; // si on choisit via autocomplete, on n'utilise plus la position GPS
         tryRoute();
       });
       destAC.addListener('place_changed', () => {
@@ -254,12 +276,42 @@
         tryRoute();
       });
 
+      avoidHighwaysEl?.addEventListener('change', tryRoute);
+      avoidTollsEl?.addEventListener('change', tryRoute);
+
+      useMyLocationBtn?.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert('La géolocalisation n\'est pas prise en charge par ce navigateur.');
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          gm.originLatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          gm.originPlaceId = null;
+          try {
+            // On remplit le champ adresse de départ avec l'adresse la plus proche
+            geocoder.geocode({ location: gm.originLatLng }, (results, status) => {
+              if (status === 'OK' && results && results[0]) {
+                originInput.value = results[0].formatted_address;
+              }
+              tryRoute();
+            });
+          } catch (e) { tryRoute(); }
+        }, (err) => {
+          console.warn('Géolocalisation refusée/échouée', err);
+          alert('Impossible de récupérer votre position. Vérifiez les autorisations.');
+        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+      });
+
       function tryRoute() {
-        if (!gm.originPlaceId || !gm.destPlaceId) return;
+        const origin = gm.originLatLng ? gm.originLatLng : (gm.originPlaceId ? { placeId: gm.originPlaceId } : null);
+        const destination = gm.destPlaceId ? { placeId: gm.destPlaceId } : null;
+        if (!origin || !destination) return;
         gm.directionsService.route({
-          origin: { placeId: gm.originPlaceId },
-          destination: { placeId: gm.destPlaceId },
-          travelMode: google.maps.TravelMode.DRIVING
+          origin,
+          destination,
+          travelMode: google.maps.TravelMode.DRIVING,
+          avoidHighways: !!(avoidHighwaysEl && avoidHighwaysEl.checked),
+          avoidTolls: !!(avoidTollsEl && avoidTollsEl.checked)
         }).then(res => {
           gm.directionsRenderer.setDirections(res);
           const leg = res.routes?.[0]?.legs?.[0];
@@ -267,11 +319,14 @@
             const km = (leg.distance.value / 1000);
             const distanceInput = document.getElementById('distanceKm');
             distanceInput.value = km.toFixed(1).replace('.', ',');
-            // Met à jour l'estimation existante
             if (typeof updateEstimate === 'function') updateEstimate();
+          } else {
+            // Pas de distance trouvée => masquer estimation et désactiver l'envoi
+            const estimateCard = document.getElementById('estimateCard');
+            const submitBtn = document.getElementById('submitBtn');
+            if (estimateCard) estimateCard.style.display = 'none';
+            if (submitBtn) submitBtn.disabled = true;
           }
-        }).catch(err => {
-          console.warn('Calcul d\'itinéraire échoué', err);
         });
       }
     }
