@@ -6,16 +6,19 @@
   <title>Express VTC 66 – Chauffeur privé à Perpignan</title>
   <meta name="description" content="Chauffeur VTC professionnel basé à Perpignan et disponible pour toutes distances. Réservation facile par WhatsApp, téléphone ou e-mail. Estimation instantanée." />
   <meta name="robots" content="index, follow" />
-  <link rel="alternate" href="#" hreflang="fr" />
-  <!-- Favicon (remplacez /favicon.ico si vous avez un fichier) -->
+  <link rel="canonical" href="https://expressvtc66.fr/" />
+  <link rel="alternate" href="https://expressvtc66.fr/" hreflang="fr" />
   <link rel="icon" href="/favicon.ico" />
+
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Express VTC 66 – Chauffeur privé à Perpignan" />
   <meta property="og:description" content="Réservez votre trajet en quelques secondes. Estimation automatique, service professionnel, toutes distances." />
-  <meta property="og:image" content="/og-image.jpg" />
+  <meta property="og:image" content="https://expressvtc66.fr/og-image.jpg" />
   <meta property="og:locale" content="fr_FR" />
+  <meta property="og:url" content="https://expressvtc66.fr/" />
   <meta name="twitter:card" content="summary_large_image" />
+
   <style>
     :root {
       --bg: #0f3d33;
@@ -27,7 +30,12 @@
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: var(--bg); color: var(--text); }
+    body {
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
     a { color: inherit; text-decoration: none; }
     .container { max-width: 1100px; margin-inline: auto; padding-inline: 16px; }
     header { text-align: center; padding: 24px 0 12px; }
@@ -50,11 +58,11 @@
 </head>
 <body>
   <header class="container" role="banner">
-    <img src="LOGO EVTC66.jpg" alt="Logo Express VTC 66" />
+    <img src="LOGO EVTC66.jpg" alt="Logo Express VTC 66" loading="eager" />
     <h1>Express VTC 66</h1>
     <p>Votre chauffeur privé <strong>basé à Perpignan</strong>, disponible pour tous vos trajets locaux ou longues distances, avec un service professionnel et ponctuel.</p>
     <div style="margin-top: 18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn btn-accent" href="https://wa.me/33685618983" target="_blank" rel="noopener">Réserver sur WhatsApp</a>
+      <a class="btn btn-accent" href="https://wa.me/33685618983" target="_blank" rel="noopener noreferrer">Réserver sur WhatsApp</a>
       <a class="btn btn-outline" href="tel:+33685618983">Appeler</a>
       <a class="btn btn-outline" href="mailto:expressvtc66@gmail.com">E-mail</a>
     </div>
@@ -64,6 +72,7 @@
     <section class="section" aria-labelledby="titre-reservation">
       <h2 id="titre-reservation">Réservation rapide</h2>
       <p>Remplissez le formulaire ci-dessous pour obtenir une estimation automatique et réserver votre trajet.</p>
+
       <div class="card" style="max-width:560px;margin:auto; text-align:left;">
         <form id="booking-form" novalidate>
           <div class="grid grid-2">
@@ -77,6 +86,7 @@
               <div id="phone-help" class="sr-only">Entrez un numéro de téléphone valide.</div>
             </div>
           </div>
+
           <div class="grid grid-2" style="margin-top:12px;">
             <div>
               <label for="date">Date</label>
@@ -87,34 +97,30 @@
               <input type="time" id="time" name="time" required />
             </div>
           </div>
-          $1
-          <div style="margin-top:6px;">
-            <button type="button" id="useMyLocation" class="btn btn-outline" style="padding:8px 12px;">📍 Utiliser ma position</button>
-          </div>
-          $1
-          <div style="margin-top:12px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
-            <label style="display:flex; gap:8px; align-items:center;">
-              <input type="checkbox" id="avoidHighways" /> Éviter autoroutes
-            </label>
-            <label style="display:flex; gap:8px; align-items:center;">
-              <input type="checkbox" id="avoidTolls" /> Éviter péages
-            </label>
+
+          <div style="margin-top:12px;">
+            <label for="from">Adresse de départ</label>
+            <input id="from" name="from" required placeholder="Adresse de départ" autocomplete="address-line1" />
           </div>
           <div style="margin-top:12px;">
-            <label for="distanceKm">Distance estimée (km)</label>
-            <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="Calculée automatiquement…" inputmode="decimal" readonly title="Renseignée automatiquement après calcul Google Maps" />
+            <label for="to">Adresse d'arrivée</label>
+            <input id="to" name="to" required placeholder="Adresse d'arrivée" autocomplete="address-line1" />
           </div>
 
-          <div id="estimateCard" class="card" style="padding: 12px; text-align:center; margin-top:12px; display:none;" aria-live="polite" aria-atomic="true">
+          <div style="margin-top:12px;">
+            <label for="distanceKm">Distance estimée (km)</label>
+            <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="ex. 12,5" inputmode="decimal" />
+          </div>
+
+          <div class="card" style="padding: 12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
             <div class="muted" style="font-size:12px;">Estimation</div>
-            <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">—</div>
+            <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">0,00&nbsp;€</div>
             <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par message</div>
           </div>
-            <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">0,00 €</div>
-            <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par message</div>
-          </div>
+
           <div id="routeMap" style="height:220px; margin-top:12px; border-radius:12px; overflow:hidden; display:none;"></div>
-          <button id="submitBtn" class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;" disabled>Envoyer sur WhatsApp</button>
+
+          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer sur WhatsApp</button>
         </form>
       </div>
     </section>
@@ -123,7 +129,7 @@
       <h2 id="titre-atouts">Pourquoi nous choisir ?</h2>
       <div class="grid grid-2">
         <div class="card">
-          <h3>Ponctualité & sécurité</h3>
+          <h3>Ponctualité &amp; sécurité</h3>
           <p>Trajets fiables, véhicule entretenu, respect strict du code de la route et des délais.</p>
         </div>
         <div class="card">
@@ -137,8 +143,8 @@
   <footer role="contentinfo">
     <div class="container">
       <p>© <span id="year"></span> Express VTC 66 – Basé à Perpignan – Chauffeur privé toutes distances.</p>
-      <p>SIREN 925008690 • <a href="mailto:expressvtc66@gmail.com">expressvtc66@gmail.com</a> • <a href="tel:+33685618983">+33 6 85 61 89 83</a></p>
-      <p class="muted">Mentions légales & Conditions – ajoutez vos liens ici</p>
+      <p>SIREN&nbsp;925008690 • <a href="mailto:expressvtc66@gmail.com">expressvtc66@gmail.com</a> • <a href="tel:+33685618983">+33&nbsp;6&nbsp;85&nbsp;61&nbsp;89&nbsp;83</a></p>
+      <p class="muted"><a href="/mentions-legales" rel="nofollow">Mentions légales</a> &nbsp;•&nbsp; <a href="/conditions">Conditions</a></p>
     </div>
   </footer>
 
@@ -149,19 +155,19 @@
       if (d <= 7) return 20;
       return 20 + (d - 7) * 1.6;
     }
-
     function formatEUR(n) {
-      try { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n); }
-      catch(e) { return (Math.round(n*100)/100).toFixed(2).replace('.', ',') + ' €'; }
+      try {
+        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
+      } catch(e) {
+        return (Math.round(n*100)/100).toFixed(2).replace('.', ',') + ' €';
+      }
     }
 
     const distanceInput = document.getElementById('distanceKm');
-    const estimateCard = document.getElementById('estimateCard');
     const estimateEl = document.getElementById('estimate');
     const form = document.getElementById('booking-form');
     const dateInput = document.getElementById('date');
     const yearSpan = document.getElementById('year');
-    const submitBtn = document.getElementById('submitBtn');
 
     // Min date = aujourd'hui (heure locale du navigateur)
     (function setTodayMin() {
@@ -175,20 +181,11 @@
     })();
 
     function updateEstimate() {
-      const val = String(distanceInput.value || '').replace(',', '.');
-      const km = Number(val);
-      if (!isFinite(km) || km <= 0) {
-        estimateCard.style.display = 'none';
-        if (submitBtn) submitBtn.disabled = true;
-        return;
-      }
-      const price = estimateFare(km);
+      const price = estimateFare(distanceInput.value);
       estimateEl.textContent = formatEUR(price);
-      estimateCard.style.display = 'block';
-      if (submitBtn) submitBtn.disabled = false;
     }
-
     distanceInput.addEventListener('input', updateEstimate);
+    updateEstimate();
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -202,17 +199,16 @@
       const price = estimateFare(km);
       const priceTxt = formatEUR(price);
 
-      // Message WhatsApp (on encode tout le bloc pour éviter les soucis d'espaces/accents)
-      const raw = `Bonjour, je souhaite réserver un VTC :\n\n`+
-                  `Nom : ${obj.name}\n`+
-                  `Téléphone : ${obj.contact}\n`+
-                  `Date : ${obj.date}\n`+
-                  `Heure : ${obj.time}\n`+
-                  `Départ : ${obj.from}\n`+
-                  `Destination : ${obj.to}\n`+
-                  `Distance estimée : ${isNaN(km) ? '' : km.toFixed(1)} km\n`+
-                  `Estimation tarifaire : ${priceTxt}`;
-
+      // Message WhatsApp (on encode tout le bloc)
+      const raw = `Bonjour, je souhaite réserver un VTC :\n\n` +
+                  `+ Nom : ${obj.name}\n` +
+                  `+ Téléphone : ${obj.contact}\n` +
+                  `+ Date : ${obj.date}\n` +
+                  `+ Heure : ${obj.time}\n` +
+                  `+ Départ : ${obj.from}\n` +
+                  `+ Destination : ${obj.to}\n` +
+                  `+ Distance estimée : ${isNaN(km) ? '' : km.toFixed(1)} km\n` +
+                  `+ Estimation tarifaire : ${priceTxt}`;
       const msg = encodeURIComponent(raw);
       window.open(`https://wa.me/33685618983?text=${msg}`, '_blank', 'noopener');
     });
@@ -220,45 +216,45 @@
 
   <!-- JSON-LD Schema.org pour le SEO local -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "TaxiService",
-    "name": "Express VTC 66",
-    "areaServed": ["Perpignan", "Pyrénées-Orientales", "Occitanie", "France"],
-    "telephone": "+33 6 85 61 89 83",
-    "email": "expressvtc66@gmail.com",
-    "url": "",
-    "sameAs": [
-      "https://wa.me/33685618983"
-    ],
-    "description": "Chauffeur VTC professionnel basé à Perpignan. Réservation simple par WhatsApp, téléphone ou e-mail. Estimation automatique.",
-    "priceRange": "€€",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Perpignan",
-      "addressCountry": "FR"
+    {
+      "@context": "https://schema.org",
+      "@type": "TaxiService",
+      "name": "Express VTC 66",
+      "areaServed": ["Perpignan", "Pyrénées-Orientales", "Occitanie", "France"],
+      "telephone": "+33 6 85 61 89 83",
+      "email": "expressvtc66@gmail.com",
+      "url": "https://expressvtc66.fr/",
+      "sameAs": ["https://wa.me/33685618983"],
+      "description": "Chauffeur VTC professionnel basé à Perpignan. Réservation simple par WhatsApp, téléphone ou e-mail. Estimation automatique.",
+      "priceRange": "€€",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Perpignan",
+        "addressCountry": "FR"
+      }
     }
-  }
   </script>
-  
+
   <!-- Google Maps + Places: auto-complétion des adresses et calcul distance -->
   <script>
-    let gm = { originPlaceId: null, originLatLng: null, destPlaceId: null, directionsService: null, directionsRenderer: null };
+    let gm = { originPlaceId: null, destPlaceId: null, directionsService: null, directionsRenderer: null };
 
     function initMaps() {
       const originInput = document.getElementById('from');
       const destInput = document.getElementById('to');
       const mapEl = document.getElementById('routeMap');
-      const avoidHighwaysEl = document.getElementById('avoidHighways');
-      const avoidTollsEl = document.getElementById('avoidTolls');
-      const useMyLocationBtn = document.getElementById('useMyLocation');
 
+      // Affiche la carte seulement si l'API est bien chargée
       if (mapEl) mapEl.style.display = 'block';
 
-      const map = new google.maps.Map(mapEl, { center: { lat: 42.6986, lng: 2.8956 }, zoom: 11, disableDefaultUI: true }); // Perpignan
+      const map = new google.maps.Map(mapEl, {
+        center: { lat: 42.6986, lng: 2.8956 }, // Perpignan
+        zoom: 11,
+        disableDefaultUI: true
+      });
+
       gm.directionsService = new google.maps.DirectionsService();
       gm.directionsRenderer = new google.maps.DirectionsRenderer({ map });
-      const geocoder = new google.maps.Geocoder();
 
       const acOptions = { componentRestrictions: { country: 'fr' }, fields: ['place_id', 'geometry', 'name', 'formatted_address'] };
       const originAC = new google.maps.places.Autocomplete(originInput, acOptions);
@@ -267,7 +263,6 @@
       originAC.addListener('place_changed', () => {
         const p = originAC.getPlace();
         gm.originPlaceId = p && p.place_id ? p.place_id : null;
-        gm.originLatLng = null; // si on choisit via autocomplete, on n'utilise plus la position GPS
         tryRoute();
       });
       destAC.addListener('place_changed', () => {
@@ -276,42 +271,12 @@
         tryRoute();
       });
 
-      avoidHighwaysEl?.addEventListener('change', tryRoute);
-      avoidTollsEl?.addEventListener('change', tryRoute);
-
-      useMyLocationBtn?.addEventListener('click', () => {
-        if (!navigator.geolocation) {
-          alert('La géolocalisation n\'est pas prise en charge par ce navigateur.');
-          return;
-        }
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          gm.originLatLng = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          gm.originPlaceId = null;
-          try {
-            // On remplit le champ adresse de départ avec l'adresse la plus proche
-            geocoder.geocode({ location: gm.originLatLng }, (results, status) => {
-              if (status === 'OK' && results && results[0]) {
-                originInput.value = results[0].formatted_address;
-              }
-              tryRoute();
-            });
-          } catch (e) { tryRoute(); }
-        }, (err) => {
-          console.warn('Géolocalisation refusée/échouée', err);
-          alert('Impossible de récupérer votre position. Vérifiez les autorisations.');
-        }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
-      });
-
       function tryRoute() {
-        const origin = gm.originLatLng ? gm.originLatLng : (gm.originPlaceId ? { placeId: gm.originPlaceId } : null);
-        const destination = gm.destPlaceId ? { placeId: gm.destPlaceId } : null;
-        if (!origin || !destination) return;
+        if (!gm.originPlaceId || !gm.destPlaceId) return;
         gm.directionsService.route({
-          origin,
-          destination,
-          travelMode: google.maps.TravelMode.DRIVING,
-          avoidHighways: !!(avoidHighwaysEl && avoidHighwaysEl.checked),
-          avoidTolls: !!(avoidTollsEl && avoidTollsEl.checked)
+          origin: { placeId: gm.originPlaceId },
+          destination: { placeId: gm.destPlaceId },
+          travelMode: google.maps.TravelMode.DRIVING
         }).then(res => {
           gm.directionsRenderer.setDirections(res);
           const leg = res.routes?.[0]?.legs?.[0];
@@ -320,18 +285,20 @@
             const distanceInput = document.getElementById('distanceKm');
             distanceInput.value = km.toFixed(1).replace('.', ',');
             if (typeof updateEstimate === 'function') updateEstimate();
-          } else {
-            // Pas de distance trouvée => masquer estimation et désactiver l'envoi
-            const estimateCard = document.getElementById('estimateCard');
-            const submitBtn = document.getElementById('submitBtn');
-            if (estimateCard) estimateCard.style.display = 'none';
-            if (submitBtn) submitBtn.disabled = true;
           }
+        }).catch(err => {
+          console.warn('Calcul d\'itinéraire échoué', err);
         });
       }
     }
   </script>
+  <!-- ⚠️ Protégez/vérrouillez votre clé par restrictions HTTP referrer dans la console Google Cloud -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
 
+  <noscript>
+    <div class="container" style="padding:12px 0 24px; text-align:center;">
+      Veuillez activer JavaScript pour calculer l'itinéraire et l'estimation automatiquement.
+    </div>
+  </noscript>
 </body>
 </html>
