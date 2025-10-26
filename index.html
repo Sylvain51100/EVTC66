@@ -164,7 +164,13 @@
     }
 
     const distanceInput = document.getElementById('distanceKm');
-    const estimateEl = document.getElementById('estimate');
+const estimateEl = document.getElementById('estimate');
+// Désactive la saisie manuelle : la distance est remplie automatiquement via Google Maps
+if (distanceInput) {
+  distanceInput.readOnly = true;
+  distanceInput.placeholder = 'Calcul automatique…';
+  distanceInput.title = 'La distance est calculée automatiquement à partir des adresses.';
+}
     const form = document.getElementById('booking-form');
     const dateInput = document.getElementById('date');
     const yearSpan = document.getElementById('year');
@@ -184,8 +190,9 @@
       const price = estimateFare(distanceInput.value);
       estimateEl.textContent = formatEUR(price);
     }
-    distanceInput.addEventListener('input', updateEstimate);
-    updateEstimate();
+    // On ne met plus à jour sur saisie manuelle pour garder 0 € tant que la distance n'est pas calculée automatiquement
+// distanceInput.addEventListener('input', updateEstimate);
+// (pas d'updateEstimate() initial)
 
     form.addEventListener('submit', function(e) {
       e.preventDefault();
@@ -272,10 +279,17 @@
       });
 
       function tryRoute() {
-        if (!gm.originPlaceId || !gm.destPlaceId) return;
+        const originVal = originInput.value?.trim();
+        const destVal = destInput.value?.trim();
+        if (!originVal || !destVal) return;
+
+        // Prépare la requête Directions : si place_id dispo on l'utilise, sinon on retombe sur l'adresse textuelle
+        const origin = gm.originPlaceId ? { placeId: gm.originPlaceId } : originVal;
+        const destination = gm.destPlaceId ? { placeId: gm.destPlaceId } : destVal;
+
         gm.directionsService.route({
-          origin: { placeId: gm.originPlaceId },
-          destination: { placeId: gm.destPlaceId },
+          origin,
+          destination,
           travelMode: google.maps.TravelMode.DRIVING
         }).then(res => {
           gm.directionsRenderer.setDirections(res);
@@ -284,12 +298,18 @@
             const km = (leg.distance.value / 1000);
             const distanceInput = document.getElementById('distanceKm');
             distanceInput.value = km.toFixed(1).replace('.', ',');
+            // ⚠️ On ne met à jour l'estimation QUE lorsque la distance auto est calculée
             if (typeof updateEstimate === 'function') updateEstimate();
           }
         }).catch(err => {
           console.warn('Calcul d\'itinéraire échoué', err);
         });
       }
+
+      // Déclenche aussi le calcul lorsqu'on quitte les champs (si l'utilisateur n'a pas cliqué dans les suggestions)
+      const debounce = (fn, ms = 400) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+      originInput.addEventListener('blur', debounce(tryRoute, 300));
+      destInput.addEventListener('blur', debounce(tryRoute, 300));
     }
   </script>
   <!-- ⚠️ Protégez/vérrouillez votre clé par restrictions HTTP referrer dans la console Google Cloud -->
