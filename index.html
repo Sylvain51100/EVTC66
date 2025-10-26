@@ -188,7 +188,8 @@ if (distanceInput) {
     })();
 
     function updateEstimate() {
-      const price = estimateFare(distanceInput.value);
+      const km = parseFloat(String(distanceInput.value || '').replace(',', '.')) || 0;
+      const price = estimateFare(km);
       estimateEl.textContent = formatEUR(price);
     }
     // On ne met plus à jour sur saisie manuelle pour garder 0 € tant que la distance n'est pas calculée automatiquement
@@ -298,7 +299,7 @@ if (distanceInput) {
           if (leg && leg.distance && typeof leg.distance.value === 'number') {
             const km = (leg.distance.value / 1000);
             const distanceInput = document.getElementById('distanceKm');
-            distanceInput.value = km.toFixed(1).replace('.', ',');
+            distanceInput.value = km.toFixed(1);
             // ⚠️ On ne met à jour l'estimation QUE lorsque la distance auto est calculée
             if (typeof updateEstimate === 'function') updateEstimate();
           }
@@ -349,7 +350,7 @@ if (distanceInput) {
         const leg = res.routes?.[0]?.legs?.[0];
         if (leg?.distance?.value) {
           const km = leg.distance.value / 1000;
-          if (distanceInput) distanceInput.value = km.toFixed(1).replace('.', ',');
+          if (distanceInput) distanceInput.value = km.toFixed(1);
           if (typeof updateEstimate === 'function') updateEstimate();
           if (statusEl) statusEl.textContent = `Distance calculée : ${km.toFixed(1)} km.`;
         } else {
@@ -370,7 +371,7 @@ if (distanceInput) {
           const meters = resp?.rows?.[0]?.elements?.[0]?.distance?.value;
           if (typeof meters === 'number') {
             const km = meters / 1000;
-            if (distanceInput) distanceInput.value = km.toFixed(1).replace('.', ',');
+            if (distanceInput) distanceInput.value = km.toFixed(1);
             if (typeof updateEstimate === 'function') updateEstimate();
             if (statusEl) statusEl.textContent = `Distance calculée : ${km.toFixed(1)} km (alternative).`;
             return;
