@@ -1,10 +1,94 @@
+<?php
+/* ============================================================
+   index.php — Express VTC 66 (tout-en-un)
+   - Page complète + traitement du formulaire (AJAX)
+   - Envoi d’e-mail via mail() (hébergement OVH)
+   - WhatsApp complètement retiré
+   ============================================================ */
+
+mb_internal_encoding('UTF-8');
+date_default_timezone_set('Europe/Paris');
+
+/* ---------- Traitement du formulaire (POST AJAX) ---------- */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  header('Content-Type: application/json; charset=utf-8');
+
+  // Honeypot anti-spam : si rempli, on répond "ok" sans rien faire
+  if (!empty($_POST['website'] ?? '')) {
+    echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
+  // Helper
+  $get = fn($k) => trim($_POST[$k] ?? '');
+
+  // Données
+  $name       = $get('name');
+  $contact    = $get('contact');
+  $dateRide   = $get('date');
+  $timeRide   = $get('time');
+  $fromAddr   = $get('from');
+  $toAddr     = $get('to');
+  $passengers = $get('passengers');
+  $payment    = $get('payment');
+  $distanceKm = str_replace(',', '.', $get('distanceKm'));
+  $estimate   = str_replace(',', '.', $get('estimatePrice'));
+
+  // Validations minimales
+  if ($name === '' || $contact === '' || $fromAddr === '' || $toAddr === '' || $dateRide === '' || $timeRide === '') {
+    echo json_encode(['ok' => false, 'error' => 'Champs manquants.'], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
+  // Corps du message
+  $distanceTxt = ($distanceKm !== '' ? (float)$distanceKm . ' km' : 'n.c.');
+  $estimateTxt = number_format((float)($estimate !== '' ? $estimate : 0), 2, ',', ' ') . ' €';
+
+  $subject = 'Nouvelle réservation – expressvtc66.fr';
+  $body =
+"Nouvelle demande de réservation via expressvtc66.fr
+
+Nom               : {$name}
+Téléphone         : {$contact}
+Date              : {$dateRide}
+Heure             : {$timeRide}
+Départ            : {$fromAddr}
+Destination       : {$toAddr}
+Passagers         : {$passengers}
+Paiement          : {$payment}
+Distance estimée  : {$distanceTxt}
+Estimation tarif. : {$estimateTxt}
+
+Horodatage : " . date('d/m/Y H:i:s') . " (Europe/Paris)
+IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
+
+  // Envoi e-mail (depuis ta boîte OVH)
+  $fromEmail = 'contact@evtc66.fr'; // ⇐ adapte si besoin
+  $toEmail   = 'contact@evtc66.fr'; // ⇐ destinataire (toi)
+
+  $headers  = "From: ".mb_encode_mimeheader('Express VTC 66', 'UTF-8')." <{$fromEmail}>\r\n";
+  $headers .= "Reply-To: {$fromEmail}\r\n";
+  $headers .= "MIME-Version: 1.0\r\n";
+  $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+  $headers .= "X-Form-Origin: expressvtc66.fr\r\n";
+
+  $ok = @mail($toEmail, $subject, $body, $headers);
+
+  if ($ok) {
+    echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
+  } else {
+    echo json_encode(['ok' => false, 'error' => "L'envoi d'e-mail a échoué."], JSON_UNESCAPED_UNICODE);
+  }
+  exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Express VTC 66 – Chauffeur privé à Perpignan</title>
-  <meta name="description" content="Chauffeur VTC professionnel basé à Perpignan et disponible pour toutes distances. Réservation facile par WhatsApp, téléphone ou e-mail. Estimation instantanée." />
+  <meta name="description" content="Chauffeur VTC professionnel basé à Perpignan et disponible pour toutes distances. Réservation facile par téléphone ou e-mail. Estimation instantanée." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://expressvtc66.fr/" />
   <link rel="alternate" href="https://expressvtc66.fr/" hreflang="fr" />
@@ -65,7 +149,9 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
     <div style="margin-top: 18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn btn-accent" href="https://wa.me/33685618983" target="_blank" rel="noopener noreferrer">Réserver sur WhatsApp</a>
+      <!-- Ancien bouton WhatsApp retiré -->
+      <!-- <a class="btn btn-accent" href="https://wa.me/33685618983" ...>Réserver sur WhatsApp</a> -->
+      <a class="btn btn-accent" href="#booking-form">Réserver maintenant</a>
       <a class="btn btn-outline" href="tel:+33685618983">Appeler</a>
       <a class="btn btn-outline" href="mailto:contact@evtc66.fr">E-mail</a>
     </div>
@@ -74,7 +160,7 @@
   <main id="contenu" class="container" role="main">
     <section class="section" aria-labelledby="titre-reservation">
       <h2 id="titre-reservation">Réservation rapide</h2>
-      <p>Remplissez le formulaire ci-dessous pour obtenir une estimation automatique et réserver votre trajet.</p>
+      <p>Remplissez le formulaire ci-dessous pour obtenir une estimation automatique et envoyer votre demande par e-mail.</p>
 
       <div class="card" style="max-width:560px;margin:auto; text-align:left;">
         <form id="booking-form" novalidate>
@@ -110,7 +196,7 @@
             <input id="to" name="to" required placeholder="Adresse d'arrivée" autocomplete="address-line1" />
           </div>
 
-          <!-- ✅ Nombre de passagers + Paiement -->
+          <!-- Nombre de passagers + Paiement -->
           <div class="grid grid-2" style="margin-top:12px;">
             <div>
               <label for="passengers">Nombre de passagers</label>
@@ -139,13 +225,16 @@
           <div class="card" style="padding: 12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
             <div class="muted" style="font-size:12px;">Estimation</div>
             <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">0,00&nbsp;€</div>
-            <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par message</div>
+            <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par e-mail</div>
           </div>
 
           <div id="routeMap" style="height:220px; margin-top:12px; border-radius:12px; overflow:hidden; display:none;"></div>
           <div id="routeStatus" class="muted" style="margin-top:8px; font-size:12px; display:none;"></div>
 
-          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer sur WhatsApp</button>
+          <!-- Honeypot anti-spam (doit rester vide) -->
+          <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer ma demande</button>
         </form>
       </div>
     </section>
@@ -159,7 +248,7 @@
         </div>
         <div class="card">
           <h3>Réservation simple</h3>
-          <p>Contact par WhatsApp, téléphone ou e-mail. Réponse rapide et devis clair.</p>
+          <p>Contact par téléphone ou e-mail. Réponse rapide et devis clair.</p>
         </div>
       </div>
     </section>
@@ -222,32 +311,35 @@
       estimateEl.textContent = formatEUR(price);
     }
 
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', async function(e) {
       e.preventDefault();
       if (!form.checkValidity()) {
         form.reportValidity();
         return;
       }
+
       const data = new FormData(form);
-      const obj = Object.fromEntries(data.entries());
-      const km = Number(String(obj.distanceKm || '0').replace(',', '.'));
+      const km = Number(String(data.get('distanceKm') || '0').replace(',', '.'));
       const price = estimateFare(km);
-      const priceTxt = formatEUR(price);
+      data.set('estimatePrice', price.toFixed(2));
 
-      const raw = `Bonjour, je souhaite réserver un VTC :\n\n` +
-                  `+ Nom : ${obj.name}\n` +
-                  `+ Téléphone : ${obj.contact}\n` +
-                  `+ Date : ${obj.date}\n` +
-                  `+ Heure : ${obj.time}\n` +
-                  `+ Départ : ${obj.from}\n` +
-                  `+ Destination : ${obj.to}\n` +
-                  `+ Passagers : ${obj.passengers}\n` +
-                  `+ Paiement : ${obj.payment}\n` +
-                  `+ Distance estimée : ${isNaN(km) ? '' : km.toFixed(1)} km\n` +
-                  `+ Estimation tarifaire : ${priceTxt}`;
+      // Honeypot : si rempli => bot
+      if (data.get('website')) { alert('Erreur d’envoi.'); return; }
 
-      const msg = encodeURIComponent(raw);
-      window.open(`https://wa.me/33685618983?text=${msg}`, '_blank', 'noopener');
+      try {
+        const res = await fetch(window.location.pathname, { method: 'POST', body: data });
+        const json = await res.json();
+        if (json && json.ok) {
+          alert('✅ Votre demande a été envoyée. Nous vous répondrons très vite par e-mail.');
+          form.reset();
+          updateEstimate();
+        } else {
+          throw new Error(json?.error || 'Envoi impossible');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('❌ Une erreur est survenue lors de l’envoi. Réessayez ou écrivez à contact@evtc66.fr.');
+      }
     });
   </script>
 
