@@ -1,87 +1,3 @@
-<?php
-/* ============================================================
-   index.php — Express VTC 66 (tout-en-un)
-   - Page complète + traitement du formulaire (AJAX)
-   - Envoi d’e-mail via mail() (hébergement OVH)
-   - WhatsApp complètement retiré
-   ============================================================ */
-
-mb_internal_encoding('UTF-8');
-date_default_timezone_set('Europe/Paris');
-
-/* ---------- Traitement du formulaire (POST AJAX) ---------- */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  header('Content-Type: application/json; charset=utf-8');
-
-  // Honeypot anti-spam : si rempli, on répond "ok" sans rien faire
-  if (!empty($_POST['website'] ?? '')) {
-    echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
-    exit;
-  }
-
-  // Helper
-  $get = fn($k) => trim($_POST[$k] ?? '');
-
-  // Données
-  $name       = $get('name');
-  $contact    = $get('contact');
-  $dateRide   = $get('date');
-  $timeRide   = $get('time');
-  $fromAddr   = $get('from');
-  $toAddr     = $get('to');
-  $passengers = $get('passengers');
-  $payment    = $get('payment');
-  $distanceKm = str_replace(',', '.', $get('distanceKm'));
-  $estimate   = str_replace(',', '.', $get('estimatePrice'));
-
-  // Validations minimales
-  if ($name === '' || $contact === '' || $fromAddr === '' || $toAddr === '' || $dateRide === '' || $timeRide === '') {
-    echo json_encode(['ok' => false, 'error' => 'Champs manquants.'], JSON_UNESCAPED_UNICODE);
-    exit;
-  }
-
-  // Corps du message
-  $distanceTxt = ($distanceKm !== '' ? (float)$distanceKm . ' km' : 'n.c.');
-  $estimateTxt = number_format((float)($estimate !== '' ? $estimate : 0), 2, ',', ' ') . ' €';
-
-  $subject = 'Nouvelle réservation – expressvtc66.fr';
-  $body =
-"Nouvelle demande de réservation via expressvtc66.fr
-
-Nom               : {$name}
-Téléphone         : {$contact}
-Date              : {$dateRide}
-Heure             : {$timeRide}
-Départ            : {$fromAddr}
-Destination       : {$toAddr}
-Passagers         : {$passengers}
-Paiement          : {$payment}
-Distance estimée  : {$distanceTxt}
-Estimation tarif. : {$estimateTxt}
-
-Horodatage : " . date('d/m/Y H:i:s') . " (Europe/Paris)
-IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
-
-  // Envoi e-mail (depuis ta boîte OVH)
-  $fromEmail = 'contact@evtc66.fr'; // ⇐ adapte si besoin
-  $toEmail   = 'contact@evtc66.fr'; // ⇐ destinataire (toi)
-
-  $headers  = "From: ".mb_encode_mimeheader('Express VTC 66', 'UTF-8')." <{$fromEmail}>\r\n";
-  $headers .= "Reply-To: {$fromEmail}\r\n";
-  $headers .= "MIME-Version: 1.0\r\n";
-  $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-  $headers .= "X-Form-Origin: expressvtc66.fr\r\n";
-
-  $ok = @mail($toEmail, $subject, $body, $headers);
-
-  if ($ok) {
-    echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
-  } else {
-    echo json_encode(['ok' => false, 'error' => "L'envoi d'e-mail a échoué."], JSON_UNESCAPED_UNICODE);
-  }
-  exit;
-}
-?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -104,42 +20,25 @@ IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
   <meta name="twitter:card" content="summary_large_image" />
 
   <style>
-    :root {
-      --bg: #0f3d33;
-      --card: #0e372f;
-      --text: #efe7d5;
-      --accent: #05e279;
-      --accentText: #052b22;
-      --muted: rgba(255,255,255,.12);
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
+    :root { --bg:#0f3d33; --card:#0e372f; --text:#efe7d5; --accent:#05e279; --accentText:#052b22; --muted:rgba(255,255,255,.12); }
+    * { box-sizing: border-box; } html, body { height: 100%; }
+    body { margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; background: var(--bg); color: var(--text); }
     a { color: inherit; text-decoration: none; }
-    .container { max-width: 1100px; margin-inline: auto; padding-inline: 16px; }
-    header { text-align: center; padding: 24px 0 12px; }
-    header img { height: 96px; width: auto; border-radius: 14px; box-shadow: 0 0 10px rgba(0,0,0,0.3); object-fit: cover; }
-    .btn { display:inline-block; padding: 12px 18px; border-radius: 14px; font-weight: 700; transition: transform .06s ease, opacity .3s ease; }
-    .btn:active { transform: translateY(1px); }
-    .btn-accent { background: var(--accent); color: var(--accentText); }
-    .btn-accent:hover { opacity: 0.9; }
-    .btn-outline { border: 1px solid var(--text); }
-    .grid { display: grid; gap: 24px; }
-    @media (min-width: 768px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
-    .card { background: var(--card); border: 1px solid var(--muted); border-radius: 20px; padding: 24px; }
-    input, textarea, select { width: 100%; padding: 12px 14px; background: var(--bg); border: 1px solid var(--muted); color: var(--text); border-radius: 12px; }
-    label { font-size: 12px; opacity: .85; display:block; margin-bottom: 6px; }
-    .section { padding: 56px 0; text-align:center; }
-    .muted { opacity: .8; }
-    footer { padding:20px 24px; text-align:center; font-size:13px; opacity:.75; }
-    footer a { text-decoration:none; border-bottom:1px dashed transparent; }
-    footer a:hover { border-bottom-color: currentColor; }
-    .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+    .container { max-width:1100px; margin-inline:auto; padding-inline:16px; }
+    header { text-align:center; padding:24px 0 12px; }
+    header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
+    .btn { display:inline-block; padding:12px 18px; border-radius:14px; font-weight:700; transition: transform .06s, opacity .3s; }
+    .btn:active { transform: translateY(1px); } .btn-accent{ background:var(--accent); color:var(--accentText) } .btn-accent:hover{ opacity:.9 }
+    .btn-outline{ border:1px solid var(--text) }
+    .grid{ display:grid; gap:24px } @media (min-width:768px){ .grid-2{ grid-template-columns:1fr 1fr } }
+    .card{ background:var(--card); border:1px solid var(--muted); border-radius:20px; padding:24px }
+    input,select{ width:100%; padding:12px 14px; background:var(--bg); border:1px solid var(--muted); color:var(--text); border-radius:12px }
+    label{ font-size:12px; opacity:.85; display:block; margin-bottom:6px }
+    .section{ padding:56px 0; text-align:center }
+    .muted{ opacity:.8 }
+    footer{ padding:20px 24px; text-align:center; font-size:13px; opacity:.75 }
+    footer a{ text-decoration:none; border-bottom:1px dashed transparent } footer a:hover{ border-bottom-color: currentColor }
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   </style>
 </head>
 <body>
@@ -148,9 +47,7 @@ IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
     <h1>Express VTC 66</h1>
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
-    <div style="margin-top: 18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <!-- Ancien bouton WhatsApp retiré -->
-      <!-- <a class="btn btn-accent" href="https://wa.me/33685618983" ...>Réserver sur WhatsApp</a> -->
+    <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
       <a class="btn btn-accent" href="#booking-form">Réserver maintenant</a>
       <a class="btn btn-outline" href="tel:+33685618983">Appeler</a>
       <a class="btn btn-outline" href="mailto:contact@evtc66.fr">E-mail</a>
@@ -171,8 +68,7 @@ IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
             </div>
             <div>
               <label for="contact">Téléphone</label>
-              <input id="contact" name="contact" required placeholder="06 XX XX XX XX" inputmode="tel" autocomplete="tel" pattern="^\+?\d[\d\s]{7,}$" aria-describedby="phone-help" />
-              <div id="phone-help" class="sr-only">Entrez un numéro de téléphone valide.</div>
+              <input id="contact" name="contact" required placeholder="06 XX XX XX XX" inputmode="tel" autocomplete="tel" pattern="^\+?\d[\d\s]{7,}$" />
             </div>
           </div>
 
@@ -196,15 +92,11 @@ IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
             <input id="to" name="to" required placeholder="Adresse d'arrivée" autocomplete="address-line1" />
           </div>
 
-          <!-- Nombre de passagers + Paiement -->
           <div class="grid grid-2" style="margin-top:12px;">
             <div>
               <label for="passengers">Nombre de passagers</label>
               <select id="passengers" name="passengers" required>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4 (max)</option>
+                <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 (max)</option>
               </select>
             </div>
             <div>
@@ -222,14 +114,13 @@ IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
             <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="Calcul automatique…" inputmode="decimal" readonly />
           </div>
 
-          <div class="card" style="padding: 12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
+          <div class="card" style="padding:12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
             <div class="muted" style="font-size:12px;">Estimation</div>
             <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">0,00&nbsp;€</div>
             <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par e-mail</div>
           </div>
 
           <div id="routeMap" style="height:220px; margin-top:12px; border-radius:12px; overflow:hidden; display:none;"></div>
-          <div id="routeStatus" class="muted" style="margin-top:8px; font-size:12px; display:none;"></div>
 
           <!-- Honeypot anti-spam (doit rester vide) -->
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
@@ -238,177 +129,73 @@ IP client  : " . ($_SERVER['REMOTE_ADDR'] ?? 'n.c.');
         </form>
       </div>
     </section>
-
-    <section class="section" aria-labelledby="titre-atouts">
-      <h2 id="titre-atouts">Pourquoi nous choisir ?</h2>
-      <div class="grid grid-2">
-        <div class="card">
-          <h3>Ponctualité &amp; sécurité</h3>
-          <p>Trajets fiables, véhicule entretenu, respect strict du code de la route et des délais.</p>
-        </div>
-        <div class="card">
-          <h3>Réservation simple</h3>
-          <p>Contact par téléphone ou e-mail. Réponse rapide et devis clair.</p>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer role="contentinfo">
     <div class="container">
       <p>© <span id="year"></span> Express VTC 66 · Basé à Perpignan · Chauffeur privé toutes distances</p>
       <p class="muted">
-        SIREN 925008690 · 
-        <a href="mailto:contact@evtc66.fr">contact@evtc66.fr</a> · 
-        <a href="tel:+33685618983">+33&nbsp;6&nbsp;85&nbsp;61&nbsp;89&nbsp;83</a>
-      </p>
-      <p class="muted">
-        <a href="/mentions-legales" rel="nofollow">Mentions légales</a> · 
-        <a href="/conditions">Conditions</a>
+        SIREN 925008690 · <a href="mailto:contact@evtc66.fr">contact@evtc66.fr</a> · <a href="tel:+33685618983">+33 6 85 61 89 83</a>
       </p>
     </div>
   </footer>
 
   <script>
-    // ✅ Formule tarif : 20€ jusqu'à 7 km, puis 1,60€/km au-delà
-    function estimateFare(km) {
-      var d = Math.max(0, Number(String(km).replace(',', '.')) || 0);
-      if (d <= 7) return 20;
-      return 20 + (d - 7) * 1.6;
-    }
-    function formatEUR(n) {
-      try {
-        return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n);
-      } catch(e) {
-        return (Math.round(n*100)/100).toFixed(2).replace('.', ',') + ' €';
-      }
-    }
+    // Tarif : 20€ jusqu'à 7 km, puis 1,60€/km au-delà
+    function estimateFare(km){ var d=Math.max(0, Number(String(km).replace(',','.'))||0); return d<=7?20:20+(d-7)*1.6; }
+    function formatEUR(n){ try{ return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n); }catch(e){ return (Math.round(n*100)/100).toFixed(2).replace('.',',')+' €'; } }
 
-    const distanceInput = document.getElementById('distanceKm');
-    const estimateEl = document.getElementById('estimate');
-    if (distanceInput) {
-      distanceInput.readOnly = true;
-      distanceInput.placeholder = 'Calcul automatique…';
-      distanceInput.title = 'La distance est calculée automatiquement à partir des adresses.';
-    }
-    const form = document.getElementById('booking-form');
-    const dateInput = document.getElementById('date');
-    const yearSpan = document.getElementById('year');
+    const distanceInput=document.getElementById('distanceKm');
+    const estimateEl=document.getElementById('estimate');
+    const form=document.getElementById('booking-form');
+    const dateInput=document.getElementById('date');
+    const yearSpan=document.getElementById('year');
 
-    (function setTodayMin() {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = String(today.getMonth() + 1).padStart(2, '0');
-      const dd = String(today.getDate()).padStart(2, '0');
-      const iso = `${yyyy}-${mm}-${dd}`;
-      dateInput.min = iso;
-      yearSpan.textContent = yyyy;
-    })();
+    (function(){ const t=new Date(); const yyyy=t.getFullYear(); const mm=String(t.getMonth()+1).padStart(2,'0'); const dd=String(t.getDate()).padStart(2,'0'); dateInput.min=`${yyyy}-${mm}-${dd}`; yearSpan.textContent=yyyy; })();
+    function updateEstimate(){ const km=parseFloat(String(distanceInput.value||'').replace(',','.'))||0; estimateEl.textContent=formatEUR(estimateFare(km)); }
+    updateEstimate();
 
-    function updateEstimate() {
-      const km = parseFloat(String(distanceInput.value || '').replace(',', '.')) || 0;
-      const price = estimateFare(km);
-      estimateEl.textContent = formatEUR(price);
-    }
-
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', async (e)=>{
       e.preventDefault();
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
+      if(!form.checkValidity()){ form.reportValidity(); return; }
 
-      const data = new FormData(form);
-      const km = Number(String(data.get('distanceKm') || '0').replace(',', '.'));
-      const price = estimateFare(km);
+      const data=new FormData(form);
+      const km=Number(String(data.get('distanceKm')||'0').replace(',','.'));
+      const price=estimateFare(km);
       data.set('estimatePrice', price.toFixed(2));
 
-      // Honeypot : si rempli => bot
-      if (data.get('website')) { alert('Erreur d’envoi.'); return; }
+      if (data.get('website')) { alert('Erreur d’envoi.'); return; } // honeypot
 
-      try {
-        const res = await fetch(window.location.pathname, { method: 'POST', body: data });
-        const json = await res.json();
-        if (json && json.ok) {
-          alert('✅ Votre demande a été envoyée. Nous vous répondrons très vite par e-mail.');
-          form.reset();
-          updateEstimate();
-        } else {
-          throw new Error(json?.error || 'Envoi impossible');
-        }
-      } catch (err) {
+      try{
+        const res=await fetch('/api/reserver', { method:'POST', body:data });
+        const json=await res.json();
+        if(json && json.ok){ alert('✅ Votre demande a été envoyée. Nous vous répondrons très vite par e-mail.'); form.reset(); updateEstimate(); }
+        else{ throw new Error(json?.error || 'Envoi impossible'); }
+      }catch(err){
         console.error(err);
-        alert('❌ Une erreur est survenue lors de l’envoi. Réessayez ou écrivez à contact@evtc66.fr.');
+        alert('❌ Une erreur est survenue lors de l’envoi. Écrivez à contact@evtc66.fr.');
       }
     });
   </script>
 
-  <!-- Google Maps + Places: auto-complétion des adresses et calcul distance -->
+  <!-- Google Maps + Places (auto-complétion + distance) -->
   <script>
-    let gm = { originPlaceId: null, destPlaceId: null, directionsService: null, directionsRenderer: null };
-
-    function initMaps() {
-      const originInput = document.getElementById('from');
-      const destInput = document.getElementById('to');
-      const mapEl = document.getElementById('routeMap');
-
-      if (mapEl) mapEl.style.display = 'block';
-
-      const map = new google.maps.Map(mapEl, {
-        center: { lat: 42.6986, lng: 2.8956 },
-        zoom: 11,
-        disableDefaultUI: true
-      });
-
-      gm.directionsService = new google.maps.DirectionsService();
-      gm.directionsRenderer = new google.maps.DirectionsRenderer({ map });
-
-      const acOptions = { componentRestrictions: { country: 'fr' }, fields: ['place_id', 'geometry', 'name', 'formatted_address'] };
-      const originAC = new google.maps.places.Autocomplete(originInput, acOptions);
-      const destAC = new google.maps.places.Autocomplete(destInput, acOptions);
-
-      originAC.addListener('place_changed', () => {
-        const p = originAC.getPlace();
-        gm.originPlaceId = p && p.place_id ? p.place_id : null;
-        tryRoute();
-      });
-      destAC.addListener('place_changed', () => {
-        const p = destAC.getPlace();
-        gm.destPlaceId = p && p.place_id ? p.place_id : null;
-        tryRoute();
-      });
-
-      function tryRoute() {
-        const originVal = originInput.value?.trim();
-        const destVal = destInput.value?.trim();
-        if (!originVal || !destVal) return;
-        const origin = gm.originPlaceId ? { placeId: gm.originPlaceId } : originVal;
-        const destination = gm.destPlaceId ? { placeId: gm.destPlaceId } : destVal;
-
-        gm.directionsService.route({
-          origin,
-          destination,
-          travelMode: google.maps.TravelMode.DRIVING
-        }).then(res => {
-          gm.directionsRenderer.setDirections(res);
-          const leg = res.routes?.[0]?.legs?.[0];
-          if (leg && leg.distance && typeof leg.distance.value === 'number') {
-            const km = (leg.distance.value / 1000);
-            const distanceInput = document.getElementById('distanceKm');
-            distanceInput.value = km.toFixed(1);
-            if (typeof updateEstimate === 'function') updateEstimate();
-          }
-        }).catch(err => {
-          console.warn('Calcul d\'itinéraire échoué', err);
-        });
-      }
-
-      const debounce = (fn, ms = 400) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
-      originInput.addEventListener('blur', debounce(tryRoute, 300));
-      destInput.addEventListener('blur', debounce(tryRoute, 300));
+    let gm={originPlaceId:null,destPlaceId:null,directionsService:null,directionsRenderer:null};
+    function initMaps(){
+      const originInput=document.getElementById('from'); const destInput=document.getElementById('to'); const mapEl=document.getElementById('routeMap'); if(mapEl) mapEl.style.display='block';
+      const map=new google.maps.Map(mapEl,{center:{lat:42.6986,lng:2.8956},zoom:11,disableDefaultUI:true});
+      gm.directionsService=new google.maps.DirectionsService(); gm.directionsRenderer=new google.maps.DirectionsRenderer({map});
+      const acOptions={componentRestrictions:{country:'fr'},fields:['place_id','geometry','name','formatted_address']};
+      const originAC=new google.maps.places.Autocomplete(originInput,acOptions); const destAC=new google.maps.places.Autocomplete(destInput,acOptions);
+      originAC.addListener('place_changed',()=>{ const p=originAC.getPlace(); gm.originPlaceId=p&&p.place_id?p.place_id:null; tryRoute(); });
+      destAC.addListener('place_changed',()=>{ const p=destAC.getPlace(); gm.destPlaceId=p&&p.place_id?p.place_id:null; tryRoute(); });
+      function tryRoute(){ const o=originInput.value?.trim(), d=destInput.value?.trim(); if(!o||!d) return; const origin=gm.originPlaceId?{placeId:gm.originPlaceId}:o; const destination=gm.destPlaceId?{placeId:gm.destPlaceId}:d;
+        gm.directionsService.route({origin,destination,travelMode:google.maps.TravelMode.DRIVING}).then(res=>{ gm.directionsRenderer.setDirections(res); const leg=res.routes?.[0]?.legs?.[0];
+          if(leg&&leg.distance&&typeof leg.distance.value==='number'){ const km=(leg.distance.value/1000); distanceInput.value=km.toFixed(1); updateEstimate(); } }).catch(err=>console.warn('Route KO',err)); }
+      const debounce=(fn,ms=400)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};};
+      originInput.addEventListener('blur',debounce(tryRoute,300)); destInput.addEventListener('blur',debounce(tryRoute,300));
     }
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
-
 </body>
 </html>
