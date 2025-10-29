@@ -48,18 +48,15 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
     <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <!-- WhatsApp (vers votre numéro) -->
       <a class="btn btn-accent"
          href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet"
          target="_blank" rel="noopener"
          aria-label="Discuter sur WhatsApp au +33 6 85 61 89 83">WhatsApp</a>
 
-      <!-- Appeler -->
       <a class="btn btn-outline"
          href="tel:+33685618983"
          aria-label="Appeler le +33 6 85 61 89 83">Appeler</a>
 
-      <!-- SMS -->
       <a class="btn btn-outline"
          href="sms:+33685618983"
          aria-label="Envoyer un SMS au +33 6 85 61 89 83">SMS</a>
@@ -118,6 +115,7 @@
             <div>
               <label for="payment">Mode de paiement</label>
               <select id="payment" name="payment" required>
+                <option value="" selected disabled>Choisir...</option>
                 <option value="CB à bord">CB à bord</option>
                 <option value="Lien CB sécurisé">Lien CB sécurisé</option>
                 <option value="Espèces à bord">Espèces à bord</option>
@@ -132,14 +130,12 @@
 
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
             <div class="muted" style="font-size:12px;">Estimation</div>
-            <!-- Affichage vide jusqu'au premier calcul -->
             <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">–</div>
             <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par e-mail</div>
           </div>
 
           <div id="routeMap" style="height:220px; margin-top:12px; border-radius:12px; overflow:hidden; display:none;"></div>
 
-          <!-- Honeypot anti-spam (doit rester vide) -->
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
           <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer le formulaire de réservation</button>
@@ -158,7 +154,6 @@
   </footer>
 
   <script>
-    // Tarif : 20€ jusqu'à 7 km, puis 1,60€/km au-delà
     function estimateFare(km){ var d=Math.max(0, Number(String(km).replace(',','.'))||0); return d<=7?20:20+(d-7)*1.6; }
     function formatEUR(n){ try{ return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n); }catch(e){ return (Math.round(n*100)/100).toFixed(2).replace('.',',')+' €'; } }
 
@@ -172,14 +167,12 @@
 
     function updateEstimate(){
       const km=parseFloat(String(distanceInput.value||'').replace(',','.'))||0;
-      // Ne calcule/affiche que s'il y a une distance > 0
       if(km>0){
         estimateEl.textContent = formatEUR(estimateFare(km));
       }else{
         estimateEl.textContent = '–';
       }
     }
-    // Pas d'appel initial : on laisse "–" jusqu'au premier calcul
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -190,7 +183,7 @@
       const price=estimateFare(km);
       data.set('estimatePrice', price.toFixed(2));
 
-      if (data.get('website')) { alert('Erreur d’envoi.'); return; } // honeypot
+      if (data.get('website')) { alert('Erreur d’envoi.'); return; }
 
       try{
         const res=await fetch('/api/reserver', { method:'POST', body:data });
@@ -198,10 +191,8 @@
         if(json && json.ok){
           alert('✅ Votre demande a été envoyée. Nous vous répondrons très vite par e-mail.');
           form.reset();
-          // Après reset, on réinitialise l'affichage de l'estimation à "–"
           estimateEl.textContent='–';
-        }
-        else{ throw new Error(json?.error || 'Envoi impossible'); }
+        } else { throw new Error(json?.error || 'Envoi impossible'); }
       }catch(err){
         console.error(err);
         alert('❌ Une erreur est survenue lors de l’envoi. Écrivez à contact@evtc66.fr.');
@@ -209,7 +200,6 @@
     });
   </script>
 
-  <!-- Google Maps + Places (auto-complétion + distance) -->
   <script>
     let gm={originPlaceId:null,destPlaceId:null,directionsService:null,directionsRenderer:null};
     function initMaps(){
