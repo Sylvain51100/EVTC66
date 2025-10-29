@@ -108,7 +108,11 @@
             <div>
               <label for="passengers">Nombre de passagers</label>
               <select id="passengers" name="passengers" required>
-                <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4 (max)</option>
+                <option value="" selected disabled>Choisir...</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4 (max)</option>
               </select>
             </div>
             <div>
@@ -128,7 +132,8 @@
 
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;" aria-live="polite" aria-atomic="true">
             <div class="muted" style="font-size:12px;">Estimation</div>
-            <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">0,00&nbsp;€</div>
+            <!-- Affichage vide jusqu'au premier calcul -->
+            <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">–</div>
             <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par e-mail</div>
           </div>
 
@@ -137,7 +142,7 @@
           <!-- Honeypot anti-spam (doit rester vide) -->
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
-          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer ma demande</button>
+          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer le formulaire de réservation</button>
         </form>
       </div>
     </section>
@@ -164,8 +169,17 @@
     const yearSpan=document.getElementById('year');
 
     (function(){ const t=new Date(); const yyyy=t.getFullYear(); const mm=String(t.getMonth()+1).padStart(2,'0'); const dd=String(t.getDate()).padStart(2,'0'); dateInput.min=`${yyyy}-${mm}-${dd}`; yearSpan.textContent=yyyy; })();
-    function updateEstimate(){ const km=parseFloat(String(distanceInput.value||'').replace(',','.'))||0; estimateEl.textContent=formatEUR(estimateFare(km)); }
-    updateEstimate();
+
+    function updateEstimate(){
+      const km=parseFloat(String(distanceInput.value||'').replace(',','.'))||0;
+      // Ne calcule/affiche que s'il y a une distance > 0
+      if(km>0){
+        estimateEl.textContent = formatEUR(estimateFare(km));
+      }else{
+        estimateEl.textContent = '–';
+      }
+    }
+    // Pas d'appel initial : on laisse "–" jusqu'au premier calcul
 
     form.addEventListener('submit', async (e)=>{
       e.preventDefault();
@@ -181,7 +195,12 @@
       try{
         const res=await fetch('/api/reserver', { method:'POST', body:data });
         const json=await res.json();
-        if(json && json.ok){ alert('✅ Votre demande a été envoyée. Nous vous répondrons très vite par e-mail.'); form.reset(); updateEstimate(); }
+        if(json && json.ok){
+          alert('✅ Votre demande a été envoyée. Nous vous répondrons très vite par e-mail.');
+          form.reset();
+          // Après reset, on réinitialise l'affichage de l'estimation à "–"
+          estimateEl.textContent='–';
+        }
         else{ throw new Error(json?.error || 'Envoi impossible'); }
       }catch(err){
         console.error(err);
