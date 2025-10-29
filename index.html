@@ -6,13 +6,13 @@
   <title>Express VTC 66 – Chauffeur privé à Perpignan</title>
   <meta name="description" content="Réservez votre trajet avec Express VTC 66 à Perpignan. Chauffeur privé professionnel, estimation automatique, réservation rapide et paiement CB ou espèces." />
   <meta name="robots" content="index, follow" />
-  <link rel="canonical" href="https://expressvtc66.fr/" />
+  <link rel="canonical" href="https://evtc66.fr/" />
   <link rel="icon" href="/favicon.ico" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Express VTC 66 – Chauffeur privé à Perpignan" />
   <meta property="og:description" content="Réservez votre trajet en quelques secondes. Estimation automatique, service professionnel, toutes distances." />
-  <meta property="og:image" content="https://expressvtc66.fr/og-image.jpg" />
-  <meta property="og:url" content="https://expressvtc66.fr/" />
+  <meta property="og:image" content="https://evtc66.fr/og-image.jpg" />
+  <meta property="og:url" content="https://evtc66.fr/" />
   <meta property="og:locale" content="fr_FR" />
   <meta name="twitter:card" content="summary_large_image" />
 
@@ -143,11 +143,12 @@
     </div>
   </footer>
 
+  <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    // Initialisation EmailJS
     (function(){
       emailjs.init({ publicKey: "-AMFepWWr38PXYIvr" });
+      console.log("Origine du site :", location.origin);
     })();
 
     const form = document.getElementById('booking-form');
@@ -186,14 +187,14 @@
           throw new Error('Réponse inattendue d’EmailJS');
         }
       } catch(err){
-        console.error(err);
-        alert('❌ Erreur lors de l’envoi. Merci d’écrire à contact@evtc66.fr');
+        console.error('EmailJS error:', err);
+        alert("❌ Envoi impossible : " + (err?.text || err?.message || err) + "\n\nVérifie que le domaine 'https://evtc66.fr' est bien autorisé dans ton compte EmailJS (Account → Domains).");
       }
     });
   </script>
 
+  <!-- Google Maps -->
   <script>
-    // Google Maps Distance automatique
     let gm={originPlaceId:null,destPlaceId:null,directionsService:null,directionsRenderer:null};
     function initMaps(){
       const originInput=document.getElementById('from');
