@@ -42,6 +42,7 @@
     footer a:hover{ border-bottom-color: currentColor; }
     .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
     .accent { color: var(--accent); font-weight: 800; }
+    .fine { font-size: 11px; font-style: italic; }
   </style>
 </head>
 <body>
@@ -95,7 +96,7 @@
             <input id="to" name="to" required placeholder="Adresse d'arrivée" />
           </div>
 
-          <div class="grid grid-2" style="margin-top:12px%;">
+          <div class="grid grid-2" style="margin-top:12px;">
             <div>
               <label for="passengers">Nombre de passagers</label>
               <select id="passengers" name="passengers" required>
@@ -127,11 +128,14 @@
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
             <div id="estimate" style="font-size:34px; font-weight:900; color:var(--accent);">–</div>
-            <div id="distanceDisplay" class="muted" style="margin-top:4px;">Distance : <span class="accent">–</span> km</div>
+            <!-- Pas d'unité au départ ; ajout de 'km' une fois calculé -->
+            <div id="distanceDisplay" class="muted" style="margin-top:4px;">Distance : <span class="accent">–</span></div>
+            <!-- Pareil pour la durée : pas d'unité au départ -->
             <div id="timeDisplay" class="muted" style="margin-top:2px;">Durée : <span class="accent">–</span></div>
-            <div class="muted" style="font-size:12px;">Tarif indicatif</div>
+            <div class="muted fine">Tarif indicatif</div>
           </div>
 
+          <!-- Champs techniques (cachés) -->
           <input type="hidden" id="distanceKm" name="distanceKm" value="">
           <input type="hidden" id="durationSec" name="durationSec" value="">
           <input type="hidden" name="estimatePrice" value="">
@@ -150,6 +154,7 @@
     </div>
   </footer>
 
+  <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
@@ -157,10 +162,11 @@
     const TEMPLATE_ID = "template_xl3afpn";
 
     emailjs.init(PUBLIC_KEY);
+
     const form = document.getElementById('booking-form');
     const estimateEl = document.getElementById('estimate');
-    const distanceInput = document.getElementById('distanceKm');
-    const durationInput = document.getElementById('durationSec');
+    const distanceInput = document.getElementById('distanceKm'); // caché
+    const durationInput = document.getElementById('durationSec'); // caché
     const distanceDisplay = document.getElementById('distanceDisplay');
     const timeDisplay = document.getElementById('timeDisplay');
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -180,6 +186,7 @@
       if(!form.checkValidity()){ form.reportValidity(); return; }
       const hp = form.querySelector('input[name="website"]');
       if (hp && hp.value) { alert('Erreur d’envoi.'); return; }
+
       const km = Number(String((distanceInput.value||'0')).replace(',','.'));
       const price = estimateFare(km);
       form.querySelector('input[name="estimatePrice"]').value = price.toFixed(2);
@@ -190,8 +197,13 @@
           alert('✅ Votre demande a été envoyée avec succès !');
           form.reset();
           estimateEl.textContent = '–';
-          distanceDisplay.innerHTML = 'Distance : <span class="accent">–</span> km';
+          // Réinitialise sans unités
+          distanceDisplay.innerHTML = 'Distance : <span class="accent">–</span>';
           timeDisplay.innerHTML = 'Durée : <span class="accent">–</span>';
+          distanceInput.value = '';
+          durationInput.value = '';
+        } else {
+          throw new Error('Réponse inattendue');
         }
       } catch(err){
         alert("❌ Envoi impossible : " + (err?.text || err?.message || err));
@@ -199,8 +211,9 @@
     });
   </script>
 
+  <!-- Google Maps -->
   <script>
-    let gm={};
+    let gm={originPlaceId:null,destPlaceId:null,directionsService:null};
     function initMaps(){
       const originInput=document.getElementById('from');
       const destInput=document.getElementById('to');
@@ -208,24 +221,33 @@
       const acOptions={componentRestrictions:{country:'fr'},fields:['place_id','geometry','name','formatted_address']};
       const originAC=new google.maps.places.Autocomplete(originInput,acOptions);
       const destAC=new google.maps.places.Autocomplete(destInput,acOptions);
-      originAC.addListener('place_changed',()=>tryRoute());
-      destAC.addListener('place_changed',()=>tryRoute());
+      originAC.addListener('place_changed',tryRoute);
+      destAC.addListener('place_changed',tryRoute);
 
       function tryRoute(){
         const o=originInput.value?.trim(), d=destInput.value?.trim();
         if(!o||!d) return;
         gm.directionsService.route({origin:o,destination:d,travelMode:google.maps.TravelMode.DRIVING}).then(res=>{
           const leg=res.routes?.[0]?.legs?.[0];
-          if(leg){
-            const km=leg.distance.value/1000;
+          if(leg && leg.distance && leg.duration){
+            const km=(leg.distance.value/1000);
             const sec=leg.duration.value;
+
+            // Alimente les champs cachés
             distanceInput.value=km.toFixed(1);
-            durationInput.value=sec;
-            estimateEl.textContent=formatEUR(estimateFare(km));
-            distanceDisplay.innerHTML=`Distance : <span class="accent">${km.toFixed(1)}</span> km`;
-            timeDisplay.innerHTML=`Durée : <span class="accent">${formatDuration(sec)}</span> min`;
+            durationInput.value=sec.toString();
+
+            // Met à jour l'encadré
+            estimateEl.textContent = formatEUR(estimateFare(km));
+            // Ajoute 'km' seulement une fois la valeur connue
+            distanceDisplay.innerHTML = `Distance : <span class="accent">${km.toFixed(1)}</span> km`;
+            // Ajoute 'min' seulement une fois la valeur connue
+            timeDisplay.innerHTML = `Durée : <span class="accent">${formatDuration(sec)}</span> min`;
+
+            // Valeur prix pour EmailJS
+            form.querySelector('input[name="estimatePrice"]').value = estimateFare(km).toFixed(2);
           }
-        });
+        }).catch(err=>console.warn('Erreur route',err));
       }
     }
   </script>
