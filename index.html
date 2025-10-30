@@ -20,7 +20,7 @@
     :root { 
       --bg:#0f3d33; --card:#0e372f; --text:#efe7d5; --accent:#05e279; 
       --accentText:#052b22; --muted:rgba(255,255,255,.12);
-      --price:#ffa500; /* orange style Bolt */
+      --price:#ff7a00; /* Orange Lamborghini 🔥 */
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -122,24 +122,19 @@
             </div>
           </div>
 
-          <!-- Informations complémentaires -->
           <div style="margin-top:12px;">
             <label for="info">Informations complémentaires</label>
             <textarea id="info" name="info" rows="3" placeholder="Ex : bagages, siège enfant, n° de vol, instructions spéciales…"></textarea>
           </div>
 
-          <!-- Encadré estimation -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
-            <!-- Prix orange (style Bolt) -->
             <div id="estimate" style="font-size:34px; font-weight:900; color:var(--price);">–</div>
-            <!-- Pas d'unité au départ ; ajout des unités après calcul -->
             <div id="distanceDisplay" class="muted" style="margin-top:4px;">Distance : <span class="accent">–</span></div>
             <div id="timeDisplay" class="muted" style="margin-top:2px;">Durée : <span class="accent">–</span></div>
             <div class="muted fine">Tarif indicatif</div>
           </div>
 
-          <!-- Champs techniques (cachés) -->
           <input type="hidden" id="distanceKm" name="distanceKm" value="">
           <input type="hidden" id="durationSec" name="durationSec" value="">
           <input type="hidden" name="estimatePrice" value="">
@@ -161,125 +156,77 @@
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
-    const SERVICE_ID  = "service_ea51htv";
-    const TEMPLATE_ID = "template_xl3afpn";
-
+    const PUBLIC_KEY="ew-llomHzPc_a5USk",SERVICE_ID="service_ea51htv",TEMPLATE_ID="template_xl3afpn";
     emailjs.init(PUBLIC_KEY);
 
-    const form = document.getElementById('booking-form');
-    const estimateEl = document.getElementById('estimate');
-    const distanceInput = document.getElementById('distanceKm'); // caché
-    const durationInput = document.getElementById('durationSec'); // caché
-    const distanceDisplay = document.getElementById('distanceDisplay');
-    const timeDisplay = document.getElementById('timeDisplay');
-    document.getElementById('year').textContent = new Date().getFullYear();
+    const form=document.getElementById('booking-form');
+    const estimateEl=document.getElementById('estimate');
+    const distanceInput=document.getElementById('distanceKm');
+    const durationInput=document.getElementById('durationSec');
+    const distanceDisplay=document.getElementById('distanceDisplay');
+    const timeDisplay=document.getElementById('timeDisplay');
+    document.getElementById('year').textContent=new Date().getFullYear();
 
-    function estimateFare(km){ var d=Math.max(0, Number(km)||0); return d<=7?20:20+(d-7)*1.6; }
-    function formatEUR(n){ return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n); }
-    function formatDuration(seconds){
-      const s = Math.max(0, Number(seconds)||0);
-      const h = Math.floor(s/3600);
-      const m = Math.round((s%3600)/60);
-      if(h>0){ return `${h} h ${m}`; }
-      return `${m}`;
-    }
+    function estimateFare(km){let d=Math.max(0,Number(km)||0);return d<=7?20:20+(d-7)*1.6;}
+    function formatEUR(n){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n);}
+    function formatDuration(seconds){const s=Math.max(0,Number(seconds)||0),h=Math.floor(s/3600),m=Math.round((s%3600)/60);return h>0?`${h} h ${m}`:`${m}`;}
 
-    form.addEventListener('submit', async (e)=>{
+    form.addEventListener('submit',async e=>{
       e.preventDefault();
-      if(!form.checkValidity()){ form.reportValidity(); return; }
-      const hp = form.querySelector('input[name="website"]');
-      if (hp && hp.value) { alert('Erreur d’envoi.'); return; }
-
-      const km = Number(String((distanceInput.value||'0')).replace(',','.'));
-      const price = estimateFare(km);
-      form.querySelector('input[name="estimatePrice"]').value = price.toFixed(2);
-
-      try {
-        const res = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form);
-        if(res.status === 200){
+      if(!form.checkValidity()){form.reportValidity();return;}
+      const hp=form.querySelector('input[name="website"]');
+      if(hp&&hp.value){alert('Erreur d’envoi.');return;}
+      const km=Number(String((distanceInput.value||'0')).replace(',','.'));
+      const price=estimateFare(km);
+      form.querySelector('input[name="estimatePrice"]').value=price.toFixed(2);
+      try{
+        const res=await emailjs.sendForm(SERVICE_ID,TEMPLATE_ID,form);
+        if(res.status===200){
           alert('✅ Votre demande a été envoyée avec succès !');
           form.reset();
-          estimateEl.textContent = '–';
-          // Réinitialise sans unités
-          distanceDisplay.innerHTML = 'Distance : <span class="accent">–</span>';
-          timeDisplay.innerHTML = 'Durée : <span class="accent">–</span>';
-          distanceInput.value = '';
-          durationInput.value = '';
-        } else {
-          throw new Error('Réponse inattendue');
-        }
-      } catch(err){
-        alert("❌ Envoi impossible : " + (err?.text || err?.message || err));
-      }
+          estimateEl.textContent='–';
+          distanceDisplay.innerHTML='Distance : <span class="accent">–</span>';
+          timeDisplay.innerHTML='Durée : <span class="accent">–</span>';
+          distanceInput.value='';durationInput.value='';
+        }else throw new Error('Réponse inattendue');
+      }catch(err){alert("❌ Envoi impossible : "+(err?.text||err?.message||err));}
     });
   </script>
 
-  <!-- Google Maps + Autocomplete Europe uniquement -->
+  <!-- Google Maps Europe -->
   <script>
     let gm={directionsService:null};
     function initMaps(){
       const originInput=document.getElementById('from');
       const destInput=document.getElementById('to');
       gm.directionsService=new google.maps.DirectionsService();
-
-      // Autocomplete sans restriction stricte, mais on filtre côté client (Europe uniquement)
       const acOptions={fields:['place_id','geometry','name','formatted_address','address_components']};
       const originAC=new google.maps.places.Autocomplete(originInput,acOptions);
       const destAC=new google.maps.places.Autocomplete(destInput,acOptions);
+      const allowedCountries=['FR','ES','IT','PT','DE','BE','LU','CH','MC','NL','GB','IE','AT','CZ','SK','HU','PL','SI','HR','DK','SE','FI','NO'];
 
-      // Liste des pays européens autorisés (codes ISO)
-      const allowedCountries = [
-        'FR','ES','IT','PT','DE','BE','LU','CH','MC','NL','GB','IE',
-        'AT','CZ','SK','HU','PL','SI','HR','DK','SE','FI','NO'
-      ];
-
-      function isEuropean(place) {
-        const comps = place?.address_components || [];
-        const country = comps.find(c => c.types.includes('country'))?.short_name;
+      function isEuropean(place){
+        const comps=place?.address_components||[];
+        const country=comps.find(c=>c.types.includes('country'))?.short_name;
         return allowedCountries.includes(country);
       }
 
-      originAC.addListener('place_changed', () => {
-        const place = originAC.getPlace();
-        if (!isEuropean(place)) {
-          alert('🚫 Désolé, seules les adresses situées en Europe sont acceptées.');
-          originInput.value = '';
-          return;
-        }
-        tryRoute();
-      });
-
-      destAC.addListener('place_changed', () => {
-        const place = destAC.getPlace();
-        if (!isEuropean(place)) {
-          alert('🚫 Désolé, seules les adresses situées en Europe sont acceptées.');
-          destInput.value = '';
-          return;
-        }
-        tryRoute();
-      });
+      originAC.addListener('place_changed',()=>{const p=originAC.getPlace();if(!isEuropean(p)){alert('🚫 Désolé, seules les adresses situées en Europe sont acceptées.');originInput.value='';return;}tryRoute();});
+      destAC.addListener('place_changed',()=>{const p=destAC.getPlace();if(!isEuropean(p)){alert('🚫 Désolé, seules les adresses situées en Europe sont acceptées.');destInput.value='';return;}tryRoute();});
 
       function tryRoute(){
-        const o=originInput.value?.trim(), d=destInput.value?.trim();
-        if(!o||!d) return;
-        gm.directionsService.route({origin:o,destination:d,travelMode:google.maps.TravelMode.DRIVING}).then(res=>{
+        const o=originInput.value?.trim(),d=destInput.value?.trim();
+        if(!o||!d)return;
+        gm.directionsService.route({origin:o,destination:d,travelMode:google.maps.TravelMode.DRIVING})
+        .then(res=>{
           const leg=res.routes?.[0]?.legs?.[0];
-          if(leg && leg.distance && leg.duration){
-            const km=(leg.distance.value/1000);
-            const sec=leg.duration.value;
-
-            // Alimente les champs cachés
-            distanceInput.value=km.toFixed(1);
-            durationInput.value=sec.toString();
-
-            // Met à jour l'encadré (prix orange, chiffres verts pour km/durée)
-            estimateEl.textContent = formatEUR(estimateFare(km));
-            distanceDisplay.innerHTML = `Distance : <span class="accent">${km.toFixed(1)}</span> km`;
-            timeDisplay.innerHTML = `Durée : <span class="accent">${formatDuration(sec)}</span> min`;
-
-            // Valeur prix pour EmailJS
-            form.querySelector('input[name="estimatePrice"]').value = estimateFare(km).toFixed(2);
+          if(leg&&leg.distance&&leg.duration){
+            const km=(leg.distance.value/1000),sec=leg.duration.value;
+            distanceInput.value=km.toFixed(1);durationInput.value=sec.toString();
+            estimateEl.textContent=formatEUR(estimateFare(km));
+            distanceDisplay.innerHTML=`Distance : <span class="accent">${km.toFixed(1)}</span> km`;
+            timeDisplay.innerHTML=`Durée : <span class="accent">${formatDuration(sec)}</span> min`;
+            form.querySelector('input[name="estimatePrice"]').value=estimateFare(km).toFixed(2);
           }
         }).catch(err=>console.warn('Erreur route',err));
       }
