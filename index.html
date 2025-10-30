@@ -146,16 +146,15 @@
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    // --- Identifiants EmailJS (configuration validée) ---
+    // --- Identifiants EmailJS ---
     const PUBLIC_KEY  = "BYqAI7RJv9jNH_Jq";
     const SERVICE_ID  = "service_ea51htv";
     const TEMPLATE_ID = "template_xl3afpn";
-    // ----------------------------------------------------
+    // -----------------------------
 
-    (function(){
-      emailjs.init({ publicKey: PUBLIC_KEY });
-      console.log("[EVTC66] EmailJS initialisé avec la clé :", PUBLIC_KEY);
-    })();
+    // Initialisation simple (recommandée par EmailJS pour les sites)
+    emailjs.init(PUBLIC_KEY);
+    console.log("[EVTC66] EmailJS init avec :", PUBLIC_KEY);
 
     const form = document.getElementById('booking-form');
     const estimateEl = document.getElementById('estimate');
@@ -177,11 +176,16 @@
       form.querySelector('input[name="estimatePrice"]').value = price.toFixed(2);
 
       try {
-        const res = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form, { publicKey: PUBLIC_KEY });
+        // IMPORTANT : envoi sans options supplémentaires
+        const res = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form);
         if(res.status === 200){
           alert('✅ Votre demande a été envoyée avec succès !');
-          form.reset(); estimateEl.textContent = '–'; distanceInput.value = '';
-        } else { throw new Error('Réponse inattendue'); }
+          form.reset();
+          estimateEl.textContent = '–';
+          distanceInput.value = '';
+        } else {
+          throw new Error('Réponse inattendue');
+        }
       } catch(err){
         console.error('Erreur EmailJS:', err);
         alert("❌ Envoi impossible : " + (err?.text || err?.message || err));
@@ -201,10 +205,17 @@
       const destAC=new google.maps.places.Autocomplete(destInput,acOptions);
       originAC.addListener('place_changed',()=>{ gm.originPlaceId=originAC.getPlace()?.place_id; tryRoute(); });
       destAC.addListener('place_changed',()=>{ gm.destPlaceId=destAC.getPlace()?.place_id; tryRoute(); });
+
       function tryRoute(){
-        const o=originInput.value?.trim(), d=destInput.value?.trim(); if(!o||!d)return;
+        const o=originInput.value?.trim(), d=destInput.value?.trim();
+        if(!o||!d) return;
         gm.directionsService.route({origin:o,destination:d,travelMode:google.maps.TravelMode.DRIVING}).then(res=>{
-          const leg=res.routes?.[0]?.legs?.[0]; if(leg){ const km=(leg.distance.value/1000); distanceInput.value=km.toFixed(1); estimateEl.textContent=formatEUR(estimateFare(km)); }
+          const leg=res.routes?.[0]?.legs?.[0];
+          if(leg&&leg.distance&&typeof leg.distance.value==='number'){
+            const km=(leg.distance.value/1000);
+            distanceInput.value=km.toFixed(1);
+            estimateEl.textContent=formatEUR(estimateFare(km));
+          }
         }).catch(err=>console.warn('Erreur route',err));
       }
     }
