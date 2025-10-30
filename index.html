@@ -16,7 +16,7 @@
       --text:#efe7d5; 
       --muted:rgba(255,255,255,.12);
       --price:#ff6a00;
-      --btn-green:#146b54; /* Vert bouton */
+      --btn-green:#146b54;
     }
 
     * { box-sizing: border-box; }
@@ -56,11 +56,25 @@
       filter: brightness(0.95);
     }
 
+    /* --- Bouton Envoyer (plus gros) --- */
     .btn-accent {
       background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
       color:#fff;
-      box-shadow:0 2px 6px rgba(0,0,0,.3);
+      box-shadow:0 4px 10px rgba(0,0,0,.4);
       border:none;
+      padding:16px 22px; /* plus grand */
+      font-size:18px; /* texte plus visible */
+      font-weight:800;
+      border-radius:16px;
+      transition: all .25s ease;
+    }
+    .btn-accent:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+    .btn-accent:active {
+      transform: translateY(2px);
+      filter: brightness(0.95);
     }
 
     .grid{ display:grid; gap:24px; }
@@ -94,7 +108,6 @@
 
     #map { height: 280px; border-radius:14px; border:1px solid var(--muted); margin-top:8px; }
 
-    /* Titre au-dessus de la carte - blanc + animation */
     .map-title {
       margin-top: 18px;
       font-size: 13px;
@@ -112,7 +125,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Distance et durée en blanc */
     #distanceDisplay span, #timeDisplay span {
       color: #fff !important;
       -webkit-text-fill-color: #fff !important;
@@ -127,7 +139,6 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
 
-    <!-- BOUTONS : fond vert, contour orange, texte blanc -->
     <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
       <a class="btn" href="tel:+33685618983">Appeler</a>
       <a class="btn" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
@@ -200,7 +211,6 @@
             <textarea id="info" name="info" rows="3" placeholder="Ex : bagages, siège enfant, n° de vol, instructions spéciales…"></textarea>
           </div>
 
-          <!-- Estimation -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
             <div id="estimate">–</div>
@@ -214,15 +224,12 @@
           <input type="hidden" name="estimatePrice" value="">
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
-          <!-- Bouton d'envoi -->
-          <button class="btn-accent" type="submit" style="margin-top:14px; width:100%;">
+          <!-- Bouton d'envoi (plus gros) -->
+          <button class="btn-accent" type="submit" style="margin-top:20px; width:100%;">
             Envoyer le formulaire de réservation
           </button>
 
-          <!-- Titre au-dessus de la carte -->
           <div class="map-title">Visualisez votre itinéraire sur la carte ci-dessous</div>
-
-          <!-- Carte Google -->
           <div id="map" aria-label="Carte de l'itinéraire"></div>
         </form>
       </div>
