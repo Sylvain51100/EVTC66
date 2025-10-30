@@ -146,22 +146,21 @@
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    // --- Identifiants EmailJS (corrigés) ---
-    const PUBLIC_KEY  = "BYqAl7JRjV9jNH_Jq";
+    // --- Identifiants EmailJS (configuration validée) ---
+    const PUBLIC_KEY  = "BYqAI7RJv9jNH_Jq";
     const SERVICE_ID  = "service_ea51htv";
     const TEMPLATE_ID = "template_xl3afpn";
-    // --------------------------------------
+    // ----------------------------------------------------
 
     (function(){
       emailjs.init({ publicKey: PUBLIC_KEY });
-      console.log("[EVTC66] Origin:", location.origin);
+      console.log("[EVTC66] EmailJS initialisé avec la clé :", PUBLIC_KEY);
     })();
 
     const form = document.getElementById('booking-form');
     const estimateEl = document.getElementById('estimate');
     const distanceInput = document.getElementById('distanceKm');
-    const yearSpan = document.getElementById('year');
-    yearSpan.textContent = new Date().getFullYear();
+    document.getElementById('year').textContent = new Date().getFullYear();
 
     function estimateFare(km){ var d=Math.max(0, Number(km)||0); return d<=7?20:20+(d-7)*1.6; }
     function formatEUR(n){ return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n); }
@@ -175,28 +174,17 @@
 
       const km = Number(String((distanceInput.value||'0')).replace(',','.'));
       const price = estimateFare(km);
-      const hiddenEstimate = form.querySelector('input[name="estimatePrice"]');
-      hiddenEstimate.value = price.toFixed(2);
+      form.querySelector('input[name="estimatePrice"]').value = price.toFixed(2);
 
       try {
-        const res = await emailjs.sendForm(
-          SERVICE_ID,
-          TEMPLATE_ID,
-          form,
-          { publicKey: PUBLIC_KEY }
-        );
-
+        const res = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form, { publicKey: PUBLIC_KEY });
         if(res.status === 200){
           alert('✅ Votre demande a été envoyée avec succès !');
-          form.reset();
-          estimateEl.textContent = '–';
-          distanceInput.value = '';
-        } else {
-          throw new Error('Réponse inattendue d’EmailJS');
-        }
+          form.reset(); estimateEl.textContent = '–'; distanceInput.value = '';
+        } else { throw new Error('Réponse inattendue'); }
       } catch(err){
-        console.error('EmailJS error:', err);
-        alert("❌ Envoi impossible : " + (err?.text || err?.message || err) + "\n\nVérifie que le domaine 'https://evtc66.fr' est bien autorisé dans ton compte EmailJS (Account → Security → Domains).");
+        console.error('Erreur EmailJS:', err);
+        alert("❌ Envoi impossible : " + (err?.text || err?.message || err));
       }
     });
   </script>
@@ -211,22 +199,13 @@
       const acOptions={componentRestrictions:{country:'fr'},fields:['place_id','geometry','name','formatted_address']};
       const originAC=new google.maps.places.Autocomplete(originInput,acOptions);
       const destAC=new google.maps.places.Autocomplete(destInput,acOptions);
-      originAC.addListener('place_changed',()=>{ const p=originAC.getPlace(); gm.originPlaceId=p?.place_id; tryRoute(); });
-      destAC.addListener('place_changed',()=>{ const p=destAC.getPlace(); gm.destPlaceId=p?.place_id; tryRoute(); });
-
+      originAC.addListener('place_changed',()=>{ gm.originPlaceId=originAC.getPlace()?.place_id; tryRoute(); });
+      destAC.addListener('place_changed',()=>{ gm.destPlaceId=destAC.getPlace()?.place_id; tryRoute(); });
       function tryRoute(){
-        const o=originInput.value?.trim(), d=destInput.value?.trim();
-        if(!o||!d) return;
-        const origin=gm.originPlaceId?{placeId:gm.originPlaceId}:o;
-        const destination=gm.destPlaceId?{placeId:gm.destPlaceId}:d;
-        gm.directionsService.route({origin,destination,travelMode:google.maps.TravelMode.DRIVING}).then(res=>{
-          const leg=res.routes?.[0]?.legs?.[0];
-          if(leg&&leg.distance&&typeof leg.distance.value==='number'){
-            const km=(leg.distance.value/1000);
-            distanceInput.value=km.toFixed(1);
-            estimateEl.textContent=formatEUR(estimateFare(km));
-          }
-        }).catch(err=>console.warn('Erreur de route',err));
+        const o=originInput.value?.trim(), d=destInput.value?.trim(); if(!o||!d)return;
+        gm.directionsService.route({origin:o,destination:d,travelMode:google.maps.TravelMode.DRIVING}).then(res=>{
+          const leg=res.routes?.[0]?.legs?.[0]; if(leg){ const km=(leg.distance.value/1000); distanceInput.value=km.toFixed(1); estimateEl.textContent=formatEUR(estimateFare(km)); }
+        }).catch(err=>console.warn('Erreur route',err));
       }
     }
   </script>
