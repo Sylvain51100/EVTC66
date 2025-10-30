@@ -17,7 +17,11 @@
   <meta name="twitter:card" content="summary_large_image" />
 
   <style>
-    :root { --bg:#0f3d33; --card:#0e372f; --text:#efe7d5; --accent:#05e279; --accentText:#052b22; --muted:rgba(255,255,255,.12); }
+    :root { 
+      --bg:#0f3d33; --card:#0e372f; --text:#efe7d5; --accent:#05e279; 
+      --accentText:#052b22; --muted:rgba(255,255,255,.12);
+      --price:#ffa500; /* orange style Bolt */
+    }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body { margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; background: var(--bg); color: var(--text); line-height:1.5; }
@@ -127,10 +131,10 @@
           <!-- Encadré estimation -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
-            <div id="estimate" style="font-size:34px; font-weight:900; color:var(--accent);">–</div>
-            <!-- Pas d'unité au départ ; ajout de 'km' une fois calculé -->
+            <!-- Prix orange (style Bolt) -->
+            <div id="estimate" style="font-size:34px; font-weight:900; color:var(--price);">–</div>
+            <!-- Pas d'unité au départ ; ajout des unités après calcul -->
             <div id="distanceDisplay" class="muted" style="margin-top:4px;">Distance : <span class="accent">–</span></div>
-            <!-- Pareil pour la durée : pas d'unité au départ -->
             <div id="timeDisplay" class="muted" style="margin-top:2px;">Durée : <span class="accent">–</span></div>
             <div class="muted fine">Tarif indicatif</div>
           </div>
@@ -211,18 +215,50 @@
     });
   </script>
 
-  <!-- Google Maps -->
+  <!-- Google Maps + Autocomplete Europe uniquement -->
   <script>
-    let gm={originPlaceId:null,destPlaceId:null,directionsService:null};
+    let gm={directionsService:null};
     function initMaps(){
       const originInput=document.getElementById('from');
       const destInput=document.getElementById('to');
       gm.directionsService=new google.maps.DirectionsService();
-      const acOptions={componentRestrictions:{country:'fr'},fields:['place_id','geometry','name','formatted_address']};
+
+      // Autocomplete sans restriction stricte, mais on filtre côté client (Europe uniquement)
+      const acOptions={fields:['place_id','geometry','name','formatted_address','address_components']};
       const originAC=new google.maps.places.Autocomplete(originInput,acOptions);
       const destAC=new google.maps.places.Autocomplete(destInput,acOptions);
-      originAC.addListener('place_changed',tryRoute);
-      destAC.addListener('place_changed',tryRoute);
+
+      // Liste des pays européens autorisés (codes ISO)
+      const allowedCountries = [
+        'FR','ES','IT','PT','DE','BE','LU','CH','MC','NL','GB','IE',
+        'AT','CZ','SK','HU','PL','SI','HR','DK','SE','FI','NO'
+      ];
+
+      function isEuropean(place) {
+        const comps = place?.address_components || [];
+        const country = comps.find(c => c.types.includes('country'))?.short_name;
+        return allowedCountries.includes(country);
+      }
+
+      originAC.addListener('place_changed', () => {
+        const place = originAC.getPlace();
+        if (!isEuropean(place)) {
+          alert('🚫 Désolé, seules les adresses situées en Europe sont acceptées.');
+          originInput.value = '';
+          return;
+        }
+        tryRoute();
+      });
+
+      destAC.addListener('place_changed', () => {
+        const place = destAC.getPlace();
+        if (!isEuropean(place)) {
+          alert('🚫 Désolé, seules les adresses situées en Europe sont acceptées.');
+          destInput.value = '';
+          return;
+        }
+        tryRoute();
+      });
 
       function tryRoute(){
         const o=originInput.value?.trim(), d=destInput.value?.trim();
@@ -237,11 +273,9 @@
             distanceInput.value=km.toFixed(1);
             durationInput.value=sec.toString();
 
-            // Met à jour l'encadré
+            // Met à jour l'encadré (prix orange, chiffres verts pour km/durée)
             estimateEl.textContent = formatEUR(estimateFare(km));
-            // Ajoute 'km' seulement une fois la valeur connue
             distanceDisplay.innerHTML = `Distance : <span class="accent">${km.toFixed(1)}</span> km`;
-            // Ajoute 'min' seulement une fois la valeur connue
             timeDisplay.innerHTML = `Durée : <span class="accent">${formatDuration(sec)}</span> min`;
 
             // Valeur prix pour EmailJS
