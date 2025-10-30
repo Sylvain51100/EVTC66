@@ -15,7 +15,7 @@
       --card:#0e372f; 
       --text:#efe7d5; 
       --muted:rgba(255,255,255,.12);
-      --price:#ff6a00; /* Orange glossy Lamborghini */
+      --price:#ff6a00;
     }
 
     * { box-sizing: border-box; }
@@ -33,7 +33,6 @@
     header { text-align:center; padding:24px 0 12px; }
     header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
 
-    /* --- Boutons --- */
     .btn {
       display:inline-block;
       padding:12px 18px;
@@ -44,14 +43,12 @@
     .btn:active { transform: translateY(1px); }
     .btn:hover{ opacity:.9; }
 
-    /* boutons sobres (Appeler / SMS / WhatsApp) */
     .btn-outline {
       border:1px solid var(--text);
       color: var(--text);
       background: transparent;
     }
 
-    /* bouton orange glossy (Envoyer) */
     .btn-accent {
       background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
       color:#fff;
@@ -87,8 +84,33 @@
       text-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 -1px 1px rgba(255,255,255,0.2);
     }
 
-    /* Carte */
-    #map { height: 280px; border-radius:14px; border:1px solid var(--muted); margin-top:12px; }
+    #map { height: 280px; border-radius:14px; border:1px solid var(--muted); margin-top:8px; }
+
+    /* Petit titre au-dessus de la carte avec animation */
+    .map-title {
+      margin-top: 18px;
+      font-size: 13px;
+      font-style: italic;
+      text-align: center;
+      background: linear-gradient(180deg, #ff8c00 0%, var(--price) 50%, #cc5200 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: fadeInUp 1.2s ease-out forwards;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
   </style>
 </head>
 <body>
@@ -143,9 +165,6 @@
             <input id="to" name="to" required placeholder="Adresse d'arrivée" />
           </div>
 
-          <!-- Carte Google -->
-          <div id="map" aria-label="Carte de l'itinéraire"></div>
-
           <div class="grid grid-2" style="margin-top:12px;">
             <div>
               <label for="passengers">Nombre de passagers</label>
@@ -173,7 +192,6 @@
             <textarea id="info" name="info" rows="3" placeholder="Ex : bagages, siège enfant, n° de vol, instructions spéciales…"></textarea>
           </div>
 
-          <!-- Encadré estimation -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
             <div id="estimate">–</div>
@@ -182,14 +200,21 @@
             <div class="muted fine">Tarif indicatif</div>
           </div>
 
-          <!-- Champs techniques (cachés) -->
           <input type="hidden" id="distanceKm" name="distanceKm" value="">
           <input type="hidden" id="durationSec" name="durationSec" value="">
           <input type="hidden" name="estimatePrice" value="">
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
           <!-- Bouton d'envoi -->
-          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer le formulaire de réservation</button>
+          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">
+            Envoyer le formulaire de réservation
+          </button>
+
+          <!-- Titre animé au-dessus de la carte -->
+          <div class="map-title">Visualisez votre itinéraire sur la carte ci-dessous</div>
+
+          <!-- Carte Google -->
+          <div id="map" aria-label="Carte de l'itinéraire"></div>
         </form>
       </div>
     </section>
@@ -202,15 +227,13 @@
     </div>
   </footer>
 
-  <!-- EmailJS -->
+  <!-- EmailJS + Google Maps scripts (inchangés) -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
     const SERVICE_ID  = "service_ea51htv";
     const TEMPLATE_ID = "template_xl3afpn";
-
     emailjs.init(PUBLIC_KEY);
-
     const form = document.getElementById('booking-form');
     const estimateEl = document.getElementById('estimate');
     const distanceInput = document.getElementById('distanceKm');
@@ -257,35 +280,27 @@
     });
   </script>
 
-  <!-- Google Maps avec autocomplétion limitée à l’Europe -->
   <script>
     let gm = { map:null, directionsService:null, directionsRenderer:null };
-
     function initMaps(){
       const originInput = document.getElementById('from');
       const destInput   = document.getElementById('to');
-
       gm.map = new google.maps.Map(document.getElementById('map'), {
         center: { lat: 42.688659, lng: 2.894833 },
         zoom: 12,
       });
-
       gm.directionsService  = new google.maps.DirectionsService();
       gm.directionsRenderer = new google.maps.DirectionsRenderer({ map: gm.map });
-
       const acOptions = { 
         fields:['place_id','geometry','name','formatted_address'],
         componentRestrictions:{country:[
           'fr','es','it','de','ch','be','nl','pt','at','lu','mc','ad','gb','ie','dk','se','no','fi','pl','cz','sk','hu','si','hr','ba','rs','bg','ro','gr'
         ]}
       };
-
       const originAC = new google.maps.places.Autocomplete(originInput, acOptions);
       const destAC   = new google.maps.places.Autocomplete(destInput, acOptions);
-
       originAC.addListener('place_changed', updateRoute);
       destAC.addListener('place_changed', updateRoute);
-
       function updateRoute(){
         const o = originInput.value?.trim();
         const d = destInput.value?.trim();
