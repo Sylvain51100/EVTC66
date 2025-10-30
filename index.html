@@ -147,7 +147,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     (function(){
-      emailjs.init({ publicKey: "-AMFepWWr38PXYIvr" });
+      emailjs.init({ publicKey: "-AMFepWWr38PXYlvr" }); // ✅ clé corrigée (L minuscule)
       console.log("Origine du site :", location.origin);
     })();
 
@@ -176,7 +176,8 @@
         const res = await emailjs.sendForm(
           "service_c48rqs8",
           "template_5ajukjp",
-          "#booking-form"
+          "#booking-form",
+          { publicKey: "-AMFepWWr38PXYlvr" } // ✅ clé corrigée + syntaxe moderne
         );
 
         if(res.status === 200){
