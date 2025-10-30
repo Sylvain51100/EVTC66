@@ -8,13 +8,6 @@
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://evtc66.fr/" />
   <link rel="icon" href="/favicon.ico" />
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Express VTC 66 – Chauffeur privé à Perpignan" />
-  <meta property="og:description" content="Réservez votre trajet en quelques secondes. Estimation automatique, service professionnel, toutes distances." />
-  <meta property="og:image" content="https://evtc66.fr/og-image.jpg" />
-  <meta property="og:url" content="https://evtc66.fr/" />
-  <meta property="og:locale" content="fr_FR" />
-  <meta name="twitter:card" content="summary_large_image" />
 
   <style>
     :root { 
@@ -47,12 +40,23 @@
       border-radius:14px;
       font-weight:700;
       transition: transform .06s, opacity .3s;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn:hover{ opacity:.9; }
+
+    /* boutons sobres (Appeler / SMS / WhatsApp) */
+    .btn-outline {
+      border:1px solid var(--text);
+      color: var(--text);
+      background: transparent;
+    }
+
+    /* bouton orange glossy (Envoyer) */
+    .btn-accent {
       background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
       color:#fff;
       box-shadow:0 2px 6px rgba(0,0,0,.3);
     }
-    .btn:active { transform: translateY(1px); }
-    .btn:hover{ opacity:.9; }
 
     .grid{ display:grid; gap:24px; }
     @media (min-width:768px){ .grid-2{ grid-template-columns:1fr 1fr; } }
@@ -82,6 +86,9 @@
       -webkit-text-fill-color: transparent;
       text-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 -1px 1px rgba(255,255,255,0.2);
     }
+
+    /* Carte */
+    #map { height: 280px; border-radius:14px; border:1px solid var(--muted); margin-top:12px; }
   </style>
 </head>
 <body>
@@ -91,11 +98,10 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
 
-    <!-- Boutons réorganisés et unifiés -->
     <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn" href="tel:+33685618983">Appeler</a>
-      <a class="btn" href="sms:+33685618983">SMS</a>
-      <a class="btn" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-outline" href="tel:+33685618983">Appeler</a>
+      <a class="btn btn-outline" href="sms:+33685618983">SMS</a>
+      <a class="btn btn-outline" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
     </div>
   </header>
 
@@ -137,6 +143,9 @@
             <input id="to" name="to" required placeholder="Adresse d'arrivée" />
           </div>
 
+          <!-- Carte Google -->
+          <div id="map" aria-label="Carte de l'itinéraire"></div>
+
           <div class="grid grid-2" style="margin-top:12px;">
             <div>
               <label for="passengers">Nombre de passagers</label>
@@ -164,6 +173,7 @@
             <textarea id="info" name="info" rows="3" placeholder="Ex : bagages, siège enfant, n° de vol, instructions spéciales…"></textarea>
           </div>
 
+          <!-- Encadré estimation -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
             <div id="estimate">–</div>
@@ -172,12 +182,14 @@
             <div class="muted fine">Tarif indicatif</div>
           </div>
 
+          <!-- Champs techniques (cachés) -->
           <input type="hidden" id="distanceKm" name="distanceKm" value="">
           <input type="hidden" id="durationSec" name="durationSec" value="">
           <input type="hidden" name="estimatePrice" value="">
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
-          <button class="btn" type="submit" style="margin-top:14px; width:100%;">Envoyer le formulaire de réservation</button>
+          <!-- Bouton d'envoi -->
+          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">Envoyer le formulaire de réservation</button>
         </form>
       </div>
     </section>
@@ -189,5 +201,113 @@
       <p class="muted">SIREN 925008690 · <a href="mailto:contact@evtc66.fr">contact@evtc66.fr</a> · <a href="tel:+33685618983">+33 6 85 61 89 83</a></p>
     </div>
   </footer>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
+    const SERVICE_ID  = "service_ea51htv";
+    const TEMPLATE_ID = "template_xl3afpn";
+
+    emailjs.init(PUBLIC_KEY);
+
+    const form = document.getElementById('booking-form');
+    const estimateEl = document.getElementById('estimate');
+    const distanceInput = document.getElementById('distanceKm');
+    const durationInput = document.getElementById('durationSec');
+    const distanceDisplay = document.getElementById('distanceDisplay');
+    const timeDisplay = document.getElementById('timeDisplay');
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function estimateFare(km){ var d=Math.max(0, Number(km)||0); return d<=7?20:20+(d-7)*1.6; }
+    function formatEUR(n){ return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n); }
+    function formatDuration(seconds){
+      const s = Math.max(0, Number(seconds)||0);
+      const h = Math.floor(s/3600);
+      const m = Math.round((s%3600)/60);
+      return h>0 ? `${h} h ${m}` : `${m}`;
+    }
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if(!form.checkValidity()){ form.reportValidity(); return; }
+
+      const hp = form.querySelector('input[name="website"]');
+      if (hp && hp.value) { alert('Erreur d’envoi.'); return; }
+
+      const km = Number(String((distanceInput.value||'0')).replace(',','.'));
+      form.querySelector('input[name="estimatePrice"]').value = estimateFare(km).toFixed(2);
+
+      try {
+        const res = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form);
+        if(res.status === 200){
+          alert('✅ Votre demande a été envoyée avec succès !');
+          form.reset();
+          estimateEl.textContent = '–';
+          distanceDisplay.innerHTML = 'Distance : <span class="accent">–</span>';
+          timeDisplay.innerHTML = 'Durée : <span class="accent">–</span>';
+          distanceInput.value = '';
+          durationInput.value = '';
+        } else {
+          throw new Error('Réponse inattendue');
+        }
+      } catch(err){
+        alert("❌ Envoi impossible : " + (err?.text || err?.message || err));
+      }
+    });
+  </script>
+
+  <!-- Google Maps avec autocomplétion limitée à l’Europe -->
+  <script>
+    let gm = { map:null, directionsService:null, directionsRenderer:null };
+
+    function initMaps(){
+      const originInput = document.getElementById('from');
+      const destInput   = document.getElementById('to');
+
+      gm.map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 42.688659, lng: 2.894833 },
+        zoom: 12,
+      });
+
+      gm.directionsService  = new google.maps.DirectionsService();
+      gm.directionsRenderer = new google.maps.DirectionsRenderer({ map: gm.map });
+
+      const acOptions = { 
+        fields:['place_id','geometry','name','formatted_address'],
+        componentRestrictions:{country:[
+          'fr','es','it','de','ch','be','nl','pt','at','lu','mc','ad','gb','ie','dk','se','no','fi','pl','cz','sk','hu','si','hr','ba','rs','bg','ro','gr'
+        ]}
+      };
+
+      const originAC = new google.maps.places.Autocomplete(originInput, acOptions);
+      const destAC   = new google.maps.places.Autocomplete(destInput, acOptions);
+
+      originAC.addListener('place_changed', updateRoute);
+      destAC.addListener('place_changed', updateRoute);
+
+      function updateRoute(){
+        const o = originInput.value?.trim();
+        const d = destInput.value?.trim();
+        if(!o || !d) return;
+        gm.directionsService.route({
+          origin:o, destination:d, travelMode:google.maps.TravelMode.DRIVING
+        }).then(res=>{
+          gm.directionsRenderer.setDirections(res);
+          const leg=res.routes?.[0]?.legs?.[0];
+          if(!leg)return;
+          const km=leg.distance.value/1000;
+          const sec=leg.duration.value;
+          distanceInput.value=km.toFixed(1);
+          durationInput.value=sec;
+          estimateEl.textContent=formatEUR(estimateFare(km));
+          distanceDisplay.innerHTML=`Distance : <span class="accent">${km.toFixed(1)}</span> km`;
+          timeDisplay.innerHTML=`Durée : <span class="accent">${formatDuration(sec)}</span> min`;
+          form.querySelector('input[name="estimatePrice"]').value=estimateFare(km).toFixed(2);
+        }).catch(err=>console.warn(err));
+      }
+    }
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
 </body>
 </html>
