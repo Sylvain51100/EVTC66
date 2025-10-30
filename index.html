@@ -146,9 +146,15 @@
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
+    // --- Identifiants EmailJS (nouveau compte) ---
+    const PUBLIC_KEY  = "BYqAI7RJjV9jNH_Jq";
+    const SERVICE_ID  = "service_ea51htv";
+    const TEMPLATE_ID = "template_xl3afpn";
+    // ------------------------------------------------
+
     (function(){
-      emailjs.init({ publicKey: "-AMFepWWr38PXYIvr" }); // ✅ clé publique actuelle
-      console.log("Origine du site :", location.origin);
+      emailjs.init({ publicKey: PUBLIC_KEY });
+      console.log("[EVTC66] Origin:", location.origin);
     })();
 
     const form = document.getElementById('booking-form');
@@ -164,32 +170,36 @@
       e.preventDefault();
       if(!form.checkValidity()){ form.reportValidity(); return; }
 
+      // anti-bot
       const hp = form.querySelector('input[name="website"]');
       if (hp && hp.value) { alert('Erreur d’envoi.'); return; }
 
+      // calcule et stocke l'estimation
       const km = Number(String((distanceInput.value||'0')).replace(',','.'));
       const price = estimateFare(km);
       const hiddenEstimate = form.querySelector('input[name="estimatePrice"]');
       hiddenEstimate.value = price.toFixed(2);
 
       try {
+        // utilise l'élément form directement
         const res = await emailjs.sendForm(
-          "service_c48rqs8",
-          "template_5ajukjp",
-          "#booking-form",
-          { publicKey: "-AMFepWWr38PXYIvr" } // ✅ même clé
+          SERVICE_ID,
+          TEMPLATE_ID,
+          form,
+          { publicKey: PUBLIC_KEY }
         );
 
         if(res.status === 200){
           alert('✅ Votre demande a été envoyée avec succès !');
           form.reset();
           estimateEl.textContent = '–';
+          distanceInput.value = '';
         } else {
           throw new Error('Réponse inattendue d’EmailJS');
         }
       } catch(err){
         console.error('EmailJS error:', err);
-        alert("❌ Envoi impossible : " + (err?.text || err?.message || err) + "\n\nVérifie que le domaine 'https://evtc66.fr' est bien autorisé dans ton compte EmailJS (Account → Domains).");
+        alert("❌ Envoi impossible : " + (err?.text || err?.message || err) + "\n\nVérifie que le domaine 'https://evtc66.fr' est bien autorisé dans ton compte EmailJS (Account → Security → Domains).");
       }
     });
   </script>
