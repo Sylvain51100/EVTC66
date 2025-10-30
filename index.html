@@ -16,6 +16,7 @@
       --text:#efe7d5; 
       --muted:rgba(255,255,255,.12);
       --price:#ff6a00;
+      --btn-green:#146b54; /* Vert bouton */
     }
 
     * { box-sizing: border-box; }
@@ -40,17 +41,19 @@
       border-radius:14px;
       font-weight:700;
       transition: all .25s ease;
-      background: transparent;
+      background: var(--btn-green);
       border: 2px solid var(--price);
       color: var(--text);
+      box-shadow: 0 0 0 rgba(255,106,0,0);
     }
     .btn:hover {
-      background: linear-gradient(180deg,rgba(255,140,0,0.12) 0%,rgba(204,82,0,0.12) 100%);
-      box-shadow: 0 0 10px rgba(255,106,0,0.4);
+      box-shadow: 0 0 10px rgba(255,106,0,0.6);
       transform: translateY(-1px);
+      filter: brightness(1.1);
     }
     .btn:active {
       transform: translateY(1px);
+      filter: brightness(0.95);
     }
 
     .btn-accent {
@@ -124,7 +127,7 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
 
-    <!-- BOUTONS : ordre Appeler / WhatsApp / SMS -->
+    <!-- BOUTONS : fond vert, contour orange, texte blanc -->
     <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
       <a class="btn" href="tel:+33685618983">Appeler</a>
       <a class="btn" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
@@ -197,7 +200,7 @@
             <textarea id="info" name="info" rows="3" placeholder="Ex : bagages, siège enfant, n° de vol, instructions spéciales…"></textarea>
           </div>
 
-          <!-- Encadré estimation -->
+          <!-- Estimation -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
             <div id="estimate">–</div>
@@ -206,7 +209,6 @@
             <div class="muted fine">Tarif indicatif</div>
           </div>
 
-          <!-- Champs cachés -->
           <input type="hidden" id="distanceKm" name="distanceKm" value="">
           <input type="hidden" id="durationSec" name="durationSec" value="">
           <input type="hidden" name="estimatePrice" value="">
@@ -234,7 +236,7 @@
     </div>
   </footer>
 
-  <!-- EmailJS + Google Maps scripts identiques -->
+  <!-- Scripts identiques -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
