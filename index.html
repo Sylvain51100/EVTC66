@@ -146,13 +146,10 @@
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    // --- Identifiants EmailJS ---
-    const PUBLIC_KEY  = "BYqAI7RJv9jNH_Jq";
+    const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
     const SERVICE_ID  = "service_ea51htv";
     const TEMPLATE_ID = "template_xl3afpn";
-    // -----------------------------
 
-    // Initialisation simple (recommandée par EmailJS pour les sites)
     emailjs.init(PUBLIC_KEY);
     console.log("[EVTC66] EmailJS init avec :", PUBLIC_KEY);
 
@@ -176,7 +173,6 @@
       form.querySelector('input[name="estimatePrice"]').value = price.toFixed(2);
 
       try {
-        // IMPORTANT : envoi sans options supplémentaires
         const res = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form);
         if(res.status === 200){
           alert('✅ Votre demande a été envoyée avec succès !');
@@ -220,6 +216,6 @@
       }
     }
   </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&loading=async&callback=initMaps" defer></script>
 </body>
 </html>
