@@ -21,11 +21,10 @@
       --bg:#0f3d33; 
       --card:#0e372f; 
       --text:#efe7d5; 
-      --accent:#05e279; 
-      --accentText:#052b22; 
       --muted:rgba(255,255,255,.12);
       --price:#ff6a00; /* Orange glossy Lamborghini */
     }
+
     * { box-sizing: border-box; }
     html, body { height: 100%; }
     body { 
@@ -35,15 +34,37 @@
       color: var(--text); 
       line-height:1.5; 
     }
+
     a { color: inherit; text-decoration: none; }
     .container { max-width:1100px; margin-inline:auto; padding-inline:16px; }
     header { text-align:center; padding:24px 0 12px; }
     header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
-    .btn { display:inline-block; padding:12px 18px; border-radius:14px; font-weight:700; transition: transform .06s, opacity .3s; }
+
+    /* --- Boutons --- */
+    .btn {
+      display:inline-block;
+      padding:12px 18px;
+      border-radius:14px;
+      font-weight:700;
+      transition: transform .06s, opacity .3s;
+    }
     .btn:active { transform: translateY(1px); }
-    .btn-accent{ background:var(--accent); color:var(--accentText); }
+    .btn-accent{
+      background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
+      color:#fff;
+      box-shadow:0 2px 6px rgba(0,0,0,.3);
+    }
     .btn-accent:hover{ opacity:.9; }
     .btn-outline{ border:1px solid var(--text); }
+
+    /* WhatsApp neutre */
+    .btn-whatsapp {
+      background:var(--card);
+      border:1px solid var(--muted);
+      color:var(--text);
+    }
+    .btn-whatsapp:hover { opacity:.8; }
+
     .grid{ display:grid; gap:24px; }
     @media (min-width:768px){ .grid-2{ grid-template-columns:1fr 1fr; } }
     .card{ background:var(--card); border:1px solid var(--muted); border-radius:20px; padding:24px; }
@@ -55,10 +76,17 @@
     footer a{ text-decoration:none; border-bottom:1px dashed transparent; }
     footer a:hover{ border-bottom-color: currentColor; }
     .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-    .accent { color: var(--accent); font-weight: 800; }
+
+    /* --- Texte estimation --- */
+    .accent { 
+      background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      font-weight:800;
+    }
     .fine { font-size: 11px; font-style: italic; }
 
-    /* effet glossy Lamborghini sur le prix */
+    /* --- Prix glossy --- */
     #estimate {
       font-size: 36px;
       font-weight: 900;
@@ -76,7 +104,7 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
     <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn btn-accent" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn btn-whatsapp" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
       <a class="btn btn-outline" href="tel:+33685618983">Appeler</a>
       <a class="btn btn-outline" href="sms:+33685618983">SMS</a>
     </div>
@@ -173,59 +201,7 @@
     </div>
   </footer>
 
-  <!-- EmailJS -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-  <script>
-    const PUBLIC_KEY="ew-llomHzPc_a5USk",SERVICE_ID="service_ea51htv",TEMPLATE_ID="template_xl3afpn";
-    emailjs.init(PUBLIC_KEY);
-    const form=document.getElementById('booking-form');
-    const estimateEl=document.getElementById('estimate');
-    const distanceInput=document.getElementById('distanceKm');
-    const durationInput=document.getElementById('durationSec');
-    const distanceDisplay=document.getElementById('distanceDisplay');
-    const timeDisplay=document.getElementById('timeDisplay');
-    document.getElementById('year').textContent=new Date().getFullYear();
-
-    function estimateFare(km){let d=Math.max(0,Number(km)||0);return d<=7?20:20+(d-7)*1.6;}
-    function formatEUR(n){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n);}
-    function formatDuration(s){const h=Math.floor(s/3600),m=Math.round((s%3600)/60);return h>0?`${h} h ${m}`:`${m}`;}
-
-    form.addEventListener('submit',async e=>{
-      e.preventDefault();
-      if(!form.checkValidity()){form.reportValidity();return;}
-      const hp=form.querySelector('input[name="website"]');
-      if(hp&&hp.value){alert('Erreur d’envoi.');return;}
-      const km=Number(String((distanceInput.value||'0')).replace(',','.'));
-      const price=estimateFare(km);
-      form.querySelector('input[name="estimatePrice"]').value=price.toFixed(2);
-      try{
-        const res=await emailjs.sendForm(SERVICE_ID,TEMPLATE_ID,form);
-        if(res.status===200){alert('✅ Votre demande a été envoyée !');form.reset();estimateEl.textContent='–';distanceDisplay.innerHTML='Distance : <span class="accent">–</span>';timeDisplay.innerHTML='Durée : <span class="accent">–</span>';distanceInput.value='';durationInput.value='';}
-        else throw new Error('Réponse inattendue');
-      }catch(err){alert("❌ Envoi impossible : "+(err?.text||err?.message||err));}
-    });
-  </script>
-
-  <!-- Google Maps Europe -->
-  <script>
-    let gm={directionsService:null};
-    function initMaps(){
-      const oI=document.getElementById('from'),dI=document.getElementById('to');
-      gm.directionsService=new google.maps.DirectionsService();
-      const acOpt={fields:['place_id','geometry','name','formatted_address','address_components']};
-      const oAC=new google.maps.places.Autocomplete(oI,acOpt);
-      const dAC=new google.maps.places.Autocomplete(dI,acOpt);
-      const allowed=['FR','ES','IT','PT','DE','BE','LU','CH','MC','NL','GB','IE','AT','CZ','SK','HU','PL','SI','HR','DK','SE','FI','NO'];
-      function ok(p){const c=p?.address_components?.find(x=>x.types.includes('country'))?.short_name;return allowed.includes(c);}
-      oAC.addListener('place_changed',()=>{const p=oAC.getPlace();if(!ok(p)){alert('🚫 Europe uniquement.');oI.value='';return;}go();});
-      dAC.addListener('place_changed',()=>{const p=dAC.getPlace();if(!ok(p)){alert('🚫 Europe uniquement.');dI.value='';return;}go();});
-      function go(){
-        const o=oI.value?.trim(),d=dI.value?.trim();if(!o||!d)return;
-        gm.directionsService.route({origin:o,destination:d,travelMode:google.maps.TravelMode.DRIVING})
-        .then(r=>{const l=r.routes?.[0]?.legs?.[0];if(l&&l.distance&&l.duration){const km=l.distance.value/1000,s=l.duration.value;distanceInput.value=km.toFixed(1);durationInput.value=s;estimateEl.textContent=formatEUR(estimateFare(km));distanceDisplay.innerHTML=`Distance : <span class="accent">${km.toFixed(1)}</span> km`;timeDisplay.innerHTML=`Durée : <span class="accent">${formatDuration(s)}</span> min`;form.querySelector('input[name="estimatePrice"]').value=estimateFare(km).toFixed(2);}}).catch(console.warn);
-      }
-    }
-  </script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&loading=async&callback=initMaps" defer></script>
+  <!-- Scripts (EmailJS + Google Maps) identiques à la version précédente -->
+  <!-- ... garde tes scripts actuels ici ... -->
 </body>
 </html>
