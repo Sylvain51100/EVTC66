@@ -33,7 +33,7 @@
     .grid{ display:grid; gap:24px; }
     @media (min-width:768px){ .grid-2{ grid-template-columns:1fr 1fr; } }
     .card{ background:var(--card); border:1px solid var(--muted); border-radius:20px; padding:24px; }
-    input,select{ width:100%; padding:12px 14px; background:var(--bg); border:1px solid var(--muted); color:var(--text); border-radius:12px; }
+    input,select,textarea{ width:100%; padding:12px 14px; background:var(--bg); border:1px solid var(--muted); color:var(--text); border-radius:12px; }
     label{ font-size:12px; opacity:.9; display:block; margin-bottom:6px; }
     .section{ padding:56px 0; text-align:center; }
     .muted{ opacity:.8; }
@@ -116,17 +116,22 @@
             </div>
           </div>
 
+          <!-- Remplacement : Informations complémentaires (à la place du champ Distance estimée) -->
           <div style="margin-top:12px;">
-            <label for="distanceKm">Distance estimée (km)</label>
-            <input id="distanceKm" name="distanceKm" type="number" step="0.1" min="0" placeholder="Calcul automatique…" readonly />
+            <label for="info">Informations complémentaires</label>
+            <textarea id="info" name="info" rows="3" placeholder="Ex : bagages, siège enfant, n° de vol, instructions spéciales…"></textarea>
           </div>
 
+          <!-- Encadré d’estimation avec affichage de la distance -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
-            <div class="muted" style="font-size:12px;">Estimation</div>
+            <div class="muted" style="font-size:12px;">Estimation du trajet</div>
             <div id="estimate" style="font-size:28px; font-weight:900; color:var(--accent);">–</div>
+            <div id="distanceDisplay" class="muted" style="margin-top:4px;">Distance : – km</div>
             <div class="muted" style="font-size:12px;">Tarif indicatif – devis final confirmé par e-mail</div>
           </div>
 
+          <!-- Champs techniques (cachés) -->
+          <input type="hidden" id="distanceKm" name="distanceKm" value="">
           <input type="hidden" name="estimatePrice" value="">
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
@@ -155,7 +160,8 @@
 
     const form = document.getElementById('booking-form');
     const estimateEl = document.getElementById('estimate');
-    const distanceInput = document.getElementById('distanceKm');
+    const distanceInput = document.getElementById('distanceKm'); // reste mais caché
+    const distanceDisplay = document.getElementById('distanceDisplay');
     document.getElementById('year').textContent = new Date().getFullYear();
 
     function estimateFare(km){ var d=Math.max(0, Number(km)||0); return d<=7?20:20+(d-7)*1.6; }
@@ -178,6 +184,7 @@
           alert('✅ Votre demande a été envoyée avec succès !');
           form.reset();
           estimateEl.textContent = '–';
+          distanceDisplay.textContent = 'Distance : – km';
           distanceInput.value = '';
         } else {
           throw new Error('Réponse inattendue');
@@ -209,8 +216,10 @@
           const leg=res.routes?.[0]?.legs?.[0];
           if(leg&&leg.distance&&typeof leg.distance.value==='number'){
             const km=(leg.distance.value/1000);
-            distanceInput.value=km.toFixed(1);
-            estimateEl.textContent=formatEUR(estimateFare(km));
+            distanceInput.value=km.toFixed(1);                    // alimente le champ caché
+            estimateEl.textContent=formatEUR(estimateFare(km));   // met à jour le prix
+            distanceDisplay.textContent = `Distance : ${km.toFixed(1)} km`; // affiche la distance
+            form.querySelector('input[name="estimatePrice"]').value = estimateFare(km).toFixed(2);
           }
         }).catch(err=>console.warn('Erreur route',err));
       }
