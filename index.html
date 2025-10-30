@@ -33,26 +33,31 @@
     header { text-align:center; padding:24px 0 12px; }
     header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
 
+    /* --- Boutons --- */
     .btn {
       display:inline-block;
       padding:12px 18px;
       border-radius:14px;
       font-weight:700;
-      transition: transform .06s, opacity .3s;
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn:hover{ opacity:.9; }
-
-    .btn-outline {
-      border:1px solid var(--text);
-      color: var(--text);
+      transition: all .25s ease;
       background: transparent;
+      border: 2px solid var(--price);
+      color: var(--text);
+    }
+    .btn:hover {
+      background: linear-gradient(180deg,rgba(255,140,0,0.12) 0%,rgba(204,82,0,0.12) 100%);
+      box-shadow: 0 0 10px rgba(255,106,0,0.4);
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      transform: translateY(1px);
     }
 
     .btn-accent {
       background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
       color:#fff;
       box-shadow:0 2px 6px rgba(0,0,0,.3);
+      border:none;
     }
 
     .grid{ display:grid; gap:24px; }
@@ -86,30 +91,29 @@
 
     #map { height: 280px; border-radius:14px; border:1px solid var(--muted); margin-top:8px; }
 
-    /* Petit titre au-dessus de la carte avec animation */
+    /* Titre au-dessus de la carte - blanc + animation */
     .map-title {
       margin-top: 18px;
       font-size: 13px;
       font-style: italic;
       text-align: center;
-      background: linear-gradient(180deg, #ff8c00 0%, var(--price) 50%, #cc5200 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 600;
+      color: #fff;
+      font-weight: 500;
       opacity: 0;
       transform: translateY(8px);
       animation: fadeInUp 1.2s ease-out forwards;
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Distance et durée en blanc */
+    #distanceDisplay span, #timeDisplay span {
+      color: #fff !important;
+      -webkit-text-fill-color: #fff !important;
+      background: none !important;
     }
   </style>
 </head>
@@ -120,10 +124,11 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
 
+    <!-- BOUTONS : ordre Appeler / WhatsApp / SMS -->
     <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn btn-outline" href="tel:+33685618983">Appeler</a>
-      <a class="btn btn-outline" href="sms:+33685618983">SMS</a>
-      <a class="btn btn-outline" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn" href="tel:+33685618983">Appeler</a>
+      <a class="btn" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="btn" href="sms:+33685618983">SMS</a>
     </div>
   </header>
 
@@ -192,25 +197,27 @@
             <textarea id="info" name="info" rows="3" placeholder="Ex : bagages, siège enfant, n° de vol, instructions spéciales…"></textarea>
           </div>
 
+          <!-- Encadré estimation -->
           <div class="card" style="padding:12px; text-align:center; margin-top:12px;">
             <div class="muted" style="font-size:12px;">Estimation du trajet</div>
             <div id="estimate">–</div>
-            <div id="distanceDisplay" class="muted" style="margin-top:4px;">Distance : <span class="accent">–</span></div>
-            <div id="timeDisplay" class="muted" style="margin-top:2px;">Durée : <span class="accent">–</span></div>
+            <div id="distanceDisplay" class="muted" style="margin-top:4px;">Distance : <span>–</span></div>
+            <div id="timeDisplay" class="muted" style="margin-top:2px;">Durée : <span>–</span></div>
             <div class="muted fine">Tarif indicatif</div>
           </div>
 
+          <!-- Champs cachés -->
           <input type="hidden" id="distanceKm" name="distanceKm" value="">
           <input type="hidden" id="durationSec" name="durationSec" value="">
           <input type="hidden" name="estimatePrice" value="">
           <input type="text" name="website" class="sr-only" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
           <!-- Bouton d'envoi -->
-          <button class="btn btn-accent" type="submit" style="margin-top:14px; width:100%;">
+          <button class="btn-accent" type="submit" style="margin-top:14px; width:100%;">
             Envoyer le formulaire de réservation
           </button>
 
-          <!-- Titre animé au-dessus de la carte -->
+          <!-- Titre au-dessus de la carte -->
           <div class="map-title">Visualisez votre itinéraire sur la carte ci-dessous</div>
 
           <!-- Carte Google -->
@@ -227,7 +234,7 @@
     </div>
   </footer>
 
-  <!-- EmailJS + Google Maps scripts (inchangés) -->
+  <!-- EmailJS + Google Maps scripts identiques -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
@@ -267,8 +274,8 @@
           alert('✅ Votre demande a été envoyée avec succès !');
           form.reset();
           estimateEl.textContent = '–';
-          distanceDisplay.innerHTML = 'Distance : <span class="accent">–</span>';
-          timeDisplay.innerHTML = 'Durée : <span class="accent">–</span>';
+          distanceDisplay.innerHTML = 'Distance : <span>–</span>';
+          timeDisplay.innerHTML = 'Durée : <span>–</span>';
           distanceInput.value = '';
           durationInput.value = '';
         } else {
@@ -316,8 +323,8 @@
           distanceInput.value=km.toFixed(1);
           durationInput.value=sec;
           estimateEl.textContent=formatEUR(estimateFare(km));
-          distanceDisplay.innerHTML=`Distance : <span class="accent">${km.toFixed(1)}</span> km`;
-          timeDisplay.innerHTML=`Durée : <span class="accent">${formatDuration(sec)}</span> min`;
+          distanceDisplay.innerHTML=`Distance : <span>${km.toFixed(1)}</span> km`;
+          timeDisplay.innerHTML=`Durée : <span>${formatDuration(sec)}</span> min`;
           form.querySelector('input[name="estimatePrice"]').value=estimateFare(km).toFixed(2);
         }).catch(err=>console.warn(err));
       }
