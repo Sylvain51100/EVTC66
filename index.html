@@ -146,11 +146,11 @@
   <!-- EmailJS -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    // --- Identifiants EmailJS (nouveau compte) ---
-    const PUBLIC_KEY  = "BYqAI7RJjV9jNH_Jq";
+    // --- Identifiants EmailJS (corrigés) ---
+    const PUBLIC_KEY  = "BYqAl7JRjV9jNH_Jq";
     const SERVICE_ID  = "service_ea51htv";
     const TEMPLATE_ID = "template_xl3afpn";
-    // ------------------------------------------------
+    // --------------------------------------
 
     (function(){
       emailjs.init({ publicKey: PUBLIC_KEY });
@@ -170,18 +170,15 @@
       e.preventDefault();
       if(!form.checkValidity()){ form.reportValidity(); return; }
 
-      // anti-bot
       const hp = form.querySelector('input[name="website"]');
       if (hp && hp.value) { alert('Erreur d’envoi.'); return; }
 
-      // calcule et stocke l'estimation
       const km = Number(String((distanceInput.value||'0')).replace(',','.'));
       const price = estimateFare(km);
       const hiddenEstimate = form.querySelector('input[name="estimatePrice"]');
       hiddenEstimate.value = price.toFixed(2);
 
       try {
-        // utilise l'élément form directement
         const res = await emailjs.sendForm(
           SERVICE_ID,
           TEMPLATE_ID,
