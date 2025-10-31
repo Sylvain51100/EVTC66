@@ -84,7 +84,6 @@
     .btn-accent:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-accent:active { transform: translateY(2px); filter: brightness(0.95); }
 
-    /* --- Liens bas --- */
     .text-links { 
       display:flex; 
       gap:14px; 
@@ -96,7 +95,6 @@
     .text-links a { border-bottom:1px dashed transparent; }
     .text-links a:hover { border-bottom-color: currentColor; }
 
-    /* --- Grilles et cartes --- */
     .grid{ display:grid; gap:24px; }
     @media (min-width:768px){ .grid-2{ grid-template-columns:1fr 1fr; } }
     .card{ background:var(--card); border:1px solid var(--muted); border-radius:20px; padding:24px; }
@@ -104,13 +102,10 @@
     label{ font-size:12px; opacity:.9; display:block; margin-bottom:6px; }
     .section{ padding:56px 0; text-align:center; }
     .muted{ opacity:.8; }
-
-    /* --- Footer --- */
     footer{ padding:20px 24px; text-align:center; font-size:13px; opacity:.75; }
     footer a{ text-decoration:none; border-bottom:1px dashed transparent; }
     footer a:hover{ border-bottom-color: currentColor; }
 
-    /* --- Estimation --- */
     #estimate {
       font-size: 36px;
       font-weight: 900;
@@ -137,6 +132,13 @@
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Masquer complètement les champs techniques */
+    input[type="hidden"],
+    input[name="website"] {
+      display: none !important;
+      visibility: hidden !important;
     }
   </style>
 </head>
