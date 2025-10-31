@@ -20,20 +20,37 @@
     }
 
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { height: 100%; margin: 0; padding: 0; }
     body { 
-      margin:0; 
       font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; 
       background: var(--bg); 
       color: var(--text); 
       line-height:1.5; 
+      overflow-x: hidden;
     }
 
     a { color: inherit; text-decoration: none; }
     .container { max-width:1100px; margin-inline:auto; padding-inline:16px; }
-    header { text-align:center; padding:24px 0 12px; }
-    header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
 
+    /* --- LOGO + animation --- */
+    header { text-align:center; padding:32px 0 12px; }
+    header img { 
+      height:120px; 
+      width:auto; 
+      border-radius:14px; 
+      box-shadow:0 0 10px rgba(0,0,0,.3); 
+      object-fit:cover; 
+      opacity:0; 
+      transform:scale(0.9);
+      animation: fadeZoom 1.2s ease-out forwards;
+    }
+
+    @keyframes fadeZoom {
+      0% { opacity:0; transform:scale(0.9); }
+      100% { opacity:1; transform:scale(1); }
+    }
+
+    /* --- Boutons --- */
     .btn {
       display:inline-block;
       padding:12px 18px;
@@ -43,12 +60,10 @@
       background: var(--btn-green);
       border: 2px solid var(--price);
       color: var(--text);
-      box-shadow: 0 0 0 rgba(255,106,0,0);
     }
     .btn:hover { box-shadow: 0 0 10px rgba(255,106,0,0.6); transform: translateY(-1px); filter: brightness(1.1); }
     .btn:active { transform: translateY(1px); filter: brightness(0.95); }
 
-    /* Boutons plus grands */
     .btn-large {
       padding: 16px 28px;
       font-size: 18px;
@@ -69,6 +84,7 @@
     .btn-accent:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-accent:active { transform: translateY(2px); filter: brightness(0.95); }
 
+    /* --- Liens bas --- */
     .text-links { 
       display:flex; 
       gap:14px; 
@@ -80,6 +96,7 @@
     .text-links a { border-bottom:1px dashed transparent; }
     .text-links a:hover { border-bottom-color: currentColor; }
 
+    /* --- Grilles et cartes --- */
     .grid{ display:grid; gap:24px; }
     @media (min-width:768px){ .grid-2{ grid-template-columns:1fr 1fr; } }
     .card{ background:var(--card); border:1px solid var(--muted); border-radius:20px; padding:24px; }
@@ -87,11 +104,13 @@
     label{ font-size:12px; opacity:.9; display:block; margin-bottom:6px; }
     .section{ padding:56px 0; text-align:center; }
     .muted{ opacity:.8; }
+
+    /* --- Footer --- */
     footer{ padding:20px 24px; text-align:center; font-size:13px; opacity:.75; }
     footer a{ text-decoration:none; border-bottom:1px dashed transparent; }
     footer a:hover{ border-bottom-color: currentColor; }
-    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 
+    /* --- Estimation --- */
     #estimate {
       font-size: 36px;
       font-weight: 900;
@@ -115,22 +134,9 @@
       animation: fadeInUp 1.2s ease-out forwards;
     }
 
-    .appear {
-      opacity: 0;
-      transform: translateY(12px);
-      animation: fadeInUp 1.2s ease-out forwards;
-      animation-delay: 0.5s;
-    }
-
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    #distanceDisplay span, #timeDisplay span {
-      color: #fff !important;
-      -webkit-text-fill-color: #fff !important;
-      background: none !important;
     }
   </style>
 </head>
@@ -141,7 +147,6 @@
     <p><strong>Votre chauffeur à Perpignan</strong></p>
     <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
 
-    <!-- Boutons plus grands et plus bas -->
     <div style="margin-top:38px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap;">
       <a class="btn btn-large" href="tel:+33685618983">Appeler</a>
       <a class="btn btn-large" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
@@ -238,7 +243,6 @@
     </section>
   </main>
 
-  <!-- Liens bas -->
   <div class="text-links appear" style="margin: 40px auto; text-align:center;">
     <a href="/services.html">Nos services</a>
     <span>•</span>
@@ -322,9 +326,7 @@
       gm.directionsRenderer = new google.maps.DirectionsRenderer({ map: gm.map });
       const acOptions = { 
         fields:['place_id','geometry','name','formatted_address'],
-        componentRestrictions:{country:[
-          'fr','es','it','de','ch','be','nl','pt','at','lu','mc','ad','gb','ie','dk','se','no','fi','pl','cz','sk','hu','si','hr','ba','rs','bg','ro','gr'
-        ]}
+        componentRestrictions:{country:['fr']}
       };
       const originAC = new google.maps.places.Autocomplete(originInput, acOptions);
       const destAC   = new google.maps.places.Autocomplete(destInput, acOptions);
@@ -353,7 +355,6 @@
     }
   </script>
 
-  <!-- Google Maps -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
 </body>
 </html>
