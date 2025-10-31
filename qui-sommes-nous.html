@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Qui sommes-nous – Express VTC 66</title>
+  <meta name="description" content="Qui sommes-nous ? Express VTC 66 : transport de personnes à Perpignan et dans la région. Service fiable, ponctuel et sécurisé, à l’écoute de vos besoins." />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="robots" content="index, follow" />
+
+  <style>
+    :root {
+      --bg:#154a3d;
+      --card:#0e372f;
+      --text:#efe7d5;
+      --muted:rgba(255,255,255,.12);
+      --btn-green:#146b54;
+      --price:#ff6a00;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height:1.5;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+    }
+
+    .container { max-width:900px; margin-inline:auto; padding-inline:16px; }
+    header { text-align:center; padding:28px 0 6px; }
+    header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
+    h1 { margin:8px 0 0; font-size:28px; font-weight:800; letter-spacing:.2px; }
+
+    .subtitle {
+      font-size:16px;
+      opacity:0.9;
+      margin-top:10px;
+      margin-bottom:45px;
+      font-weight:500;
+      text-align:center;
+    }
+
+    .section { padding:32px 0; text-align:center; }
+    .services-wrap{ max-width:760px; margin:0 auto; text-align:left; }
+    .service-item { background: var(--card); border:1px solid var(--muted); border-radius:18px; padding:18px; margin-bottom:14px; }
+    .service-item h3 { margin:0 0 6px; font-size:20px; display:flex; align-items:center; gap:8px; }
+    .service-item p { margin:0; }
+
+    .page-title {
+      text-align:center;
+      font-size:28px;
+      margin:0 0 24px;
+      font-weight:900;
+      background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 -1px 1px rgba(255,255,255,0.2);
+    }
+
+    .footer-bar {
+      margin-top:auto;
+      position:sticky;
+      bottom:0;
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(6px);
+      border-top:1px solid var(--muted);
+    }
+    .inner { display:flex; justify-content:center; padding:16px; }
+    .btn-back {
+      display:inline-block;
+      padding:12px 18px;
+      border-radius:14px;
+      font-weight:800;
+      text-decoration:none;
+      background: var(--btn-green);
+      border: 2px solid var(--price);
+      color: var(--text);
+      transition: all .25s ease;
+      box-shadow:0 0 0 rgba(255,106,0,0);
+    }
+    .btn-back:hover { box-shadow:0 0 10px rgba(255,106,0,.6); transform: translateY(-1px); filter: brightness(1.06); }
+    .btn-back:active { transform: translateY(1px); filter: brightness(.96); }
+
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+  </style>
+</head>
+<body>
+  <a class="sr-only" href="#retour">Aller au bouton de retour</a>
+
+  <header class="container" role="banner">
+    <img src="/LOGO EVTC66.jpg" alt="Logo Express VTC 66" loading="eager" />
+    <h1>Express VTC 66</h1>
+    <p class="subtitle"><strong>Votre chauffeur à Perpignan</strong></p>
+  </header>
+
+  <main class="container" role="main">
+    <section class="section services-wrap" aria-labelledby="titre-quisommesnous">
+      <h2 id="titre-quisommesnous" class="page-title">Qui sommes-nous</h2>
+
+      <article class="service-item">
+        <h3>❓ Qui sommes-nous ?</h3>
+        <p>Chez Express VTC 66, nous sommes spécialisés dans le transport de personnes à Perpignan et dans toute sa région. Forts d’une solide expérience dans le domaine, nous mettons un point d’honneur à offrir un service fiable, ponctuel, sécurisé et respectueux de nos clients.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>🤝 Nos engagements</h3>
+        <p>Nous croyons que chaque trajet compte. C’est pourquoi notre engagement repose sur la qualité de l’accueil, la propreté de nos véhicules, la courtoisie de nos chauffeurs et le respect total de vos horaires.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>🎯 Notre mission</h3>
+        <p>Notre mission est simple : faciliter vos déplacements avec professionnalisme, que ce soit pour un rendez-vous personnel, un déplacement professionnel ou un transfert vers une gare ou un aéroport.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>✅ Pourquoi nous choisir</h3>
+        <p>Réserver avec Express VTC 66, c’est faire le choix d’un chauffeur à l’écoute, expérimenté, et toujours prêt à répondre à vos besoins avec sérieux et réactivité.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer class="footer-bar" role="contentinfo">
+    <div class="inner">
+      <a id="retour" class="btn-back" href="/">← Retour à l'accueil</a>
+    </div>
+  </footer>
+</body>
+</html>
