@@ -4,14 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Nos services – Express VTC 66</title>
-  <meta name="description" content="Express VTC 66 – Page services épurée." />
+  <meta name="description" content="Express VTC 66 – Chauffeur privé à Perpignan : transferts gares/aéroports, mises à disposition, trajets locaux et longues distances, déplacements pros." />
   <link rel="icon" href="/favicon.ico" />
   <meta name="robots" content="index, follow" />
 
   <style>
     :root {
       /* LÉGÈREMENT moins vert que la home pour signaler le changement de page */
-      --bg:#154a3d;       /* home = #0f3d33 */
+      --bg:#154a3d;  /* home = #0f3d33 */
+      --card:#0e372f;
       --text:#efe7d5;
       --muted:rgba(255,255,255,.12);
       --btn-green:#146b54;
@@ -31,13 +32,19 @@
       min-height:100vh;
     }
 
-    .container { max-width: 900px; margin-inline:auto; padding-inline:16px; }
-
+    .container { max-width:900px; margin-inline:auto; padding-inline:16px; }
     header { text-align:center; padding:28px 0 6px; }
     header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
     h1 { margin:8px 0 0; font-size:28px; font-weight:800; letter-spacing:.2px; }
 
-    /* Bouton retour en bas */
+    .section { padding:32px 0; text-align:center; }
+    .services-wrap{ max-width:760px; margin:0 auto; text-align:left; }
+    .service-item { background: var(--card); border:1px solid var(--muted); border-radius:18px; padding:18px; margin-bottom:14px; }
+    .service-item h3 { margin:0 0 6px; font-size:20px; display:flex; align-items:center; gap:8px; }
+    .service-item p { margin:0; }
+    .page-title { text-align:center; font-size:28px; margin:0 0 18px; }
+
+    /* Bouton retour en bas uniquement */
     .footer-bar {
       margin-top:auto;              /* pousse le footer en bas */
       position:sticky;
@@ -47,7 +54,6 @@
       border-top:1px solid var(--muted);
     }
     .inner { display:flex; justify-content:center; padding:16px; }
-
     .btn-back {
       display:inline-block;
       padding:12px 18px;
@@ -73,11 +79,39 @@
   <header class="container" role="banner">
     <img src="/LOGO EVTC66.jpg" alt="Logo Express VTC 66" loading="eager" />
     <h1>Express VTC 66</h1>
-    <!-- Page minimaliste : aucun autre bouton ni contenu -->
+    <!-- Aucun autre bouton ici -->
   </header>
 
-  <!-- Main volontairement vide -->
-  <main class="container" role="main" aria-label="Page services épurée"></main>
+  <main class="container" role="main">
+    <section class="section services-wrap" aria-labelledby="titre-services">
+      <h2 id="titre-services" class="page-title">Nos services</h2>
+
+      <article class="service-item">
+        <h3>🚕 Transferts aéroports & gares</h3>
+        <p>Trajets sereins et ponctuels vers/depuis les gares et aéroports de la région.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>🕒 Mise à disposition</h3>
+        <p>Véhicule avec chauffeur pour plusieurs heures (affaires, événements, mariages, visites).</p>
+      </article>
+
+      <article class="service-item">
+        <h3>📍 Trajets locaux & longues distances</h3>
+        <p>Perpignan et partout en France/Europe sur réservation, confort et sécurité garantis.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>🧳 Déplacements professionnels</h3>
+        <p>Service discret et fiable pour vos rendez-vous, navettes d’équipes et clients.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>💳 Paiement simplifié</h3>
+        <p>CB à bord, lien CB sécurisé ou espèces. Tarif annoncé à l’avance, pas de surprise.</p>
+      </article>
+    </section>
+  </main>
 
   <!-- Bouton de retour en bas uniquement -->
   <footer class="footer-bar" role="contentinfo">
