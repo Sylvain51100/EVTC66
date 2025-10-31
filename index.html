@@ -32,7 +32,6 @@
     a { color: inherit; text-decoration: none; }
     .container { max-width:1100px; margin-inline:auto; padding-inline:16px; }
 
-    /* --- LOGO + animation --- */
     header { text-align:center; padding:32px 0 12px; }
     header img { 
       height:120px; 
@@ -50,7 +49,6 @@
       100% { opacity:1; transform:scale(1); }
     }
 
-    /* --- Boutons --- */
     .btn {
       display:inline-block;
       padding:12px 18px;
@@ -134,11 +132,53 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Masquer complètement les champs techniques */
     input[type="hidden"],
     input[name="website"] {
       display: none !important;
       visibility: hidden !important;
+    }
+
+    #floating-quote{
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 1000;
+      width: 260px;
+      background: var(--card);
+      border: 1px solid var(--muted);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      display: none;
+    }
+    #floating-quote.show{ display: block; }
+    #floating-quote .title{ font-size: 12px; opacity: .8; margin-bottom: 6px; text-align: left; }
+    #floating-quote .price{
+      font-size: 22px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      background: linear-gradient(180deg,#ff8c00 0%, var(--price) 50%, #cc5200 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    #floating-quote .line{ font-size: 14px; opacity: .9; }
+    #floating-quote button.close{
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      opacity: .7;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      position: absolute;
+      top: 8px; right: 10px;
+    }
+    #floating-quote button.close:hover{ opacity: 1; }
+    @media (max-width: 480px){
+      #floating-quote{ left: 12px; right: 12px; width: auto; }
     }
   </style>
 </head>
@@ -164,37 +204,15 @@
       <div class="card" style="max-width:560px;margin:auto; text-align:left;">
         <form id="booking-form" novalidate>
           <div class="grid grid-2">
-            <div>
-              <label for="name">Nom</label>
-              <input id="name" name="name" required placeholder="Votre nom" autocomplete="name" />
-            </div>
-            <div>
-              <label for="contact">Téléphone</label>
-              <input id="contact" name="contact" required placeholder="06 XX XX XX XX" inputmode="tel" autocomplete="tel" />
-            </div>
+            <div><label for="name">Nom</label><input id="name" name="name" required placeholder="Votre nom" autocomplete="name" /></div>
+            <div><label for="contact">Téléphone</label><input id="contact" name="contact" required placeholder="06 XX XX XX XX" inputmode="tel" autocomplete="tel" /></div>
           </div>
-
           <div class="grid grid-2" style="margin-top:12px;">
-            <div>
-              <label for="date">Date</label>
-              <input type="date" id="date" name="date" required />
-            </div>
-            <div>
-              <label for="time">Heure</label>
-              <input type="time" id="time" name="time" required />
-            </div>
+            <div><label for="date">Date</label><input type="date" id="date" name="date" required /></div>
+            <div><label for="time">Heure</label><input type="time" id="time" name="time" required /></div>
           </div>
-
-          <div style="margin-top:12px;">
-            <label for="from">Adresse de départ</label>
-            <input id="from" name="from" required placeholder="Adresse de départ" />
-          </div>
-          <div style="margin-top:12px;">
-            <label for="to">Adresse d'arrivée</label>
-            <input id="to" name="to" required placeholder="Adresse d'arrivée" />
-          </div>
-
-          <div class="grid grid-2" style="margin-top:12px%;">
+          <div style="margin-top:12px;"><label for="from">Adresse de départ</label><input id="from" name="from" required placeholder="Adresse de départ" /></div>
+  <div class="grid grid-2" style="margin-top:12px%;">
             <div>
               <label for="passengers">Nombre de passagers</label>
               <select id="passengers" name="passengers" required>
@@ -262,60 +280,66 @@
     </div>
   </footer>
 
+  <!-- Panneau flottant estimation -->
+  <div id="floating-quote" aria-live="polite" aria-label="Estimation flottante">
+    <button class="close" type="button" aria-label="Fermer">×</button>
+    <div class="title">Votre estimation</div>
+    <div id="floatPrice" class="price">—</div>
+    <div class="line">Distance : <span id="floatDist">—</span></div>
+    <div class="line">Durée : <span id="floatDur">—</span></div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
-    const PUBLIC_KEY  = "ew-llomHzPc_a5USk";
-    const SERVICE_ID  = "service_ea51htv";
-    const TEMPLATE_ID = "template_xl3afpn";
+    const PUBLIC_KEY="ew-llomHzPc_a5USk",SERVICE_ID="service_ea51htv",TEMPLATE_ID="template_xl3afpn";
     emailjs.init(PUBLIC_KEY);
-    const form = document.getElementById('booking-form');
-    const estimateEl = document.getElementById('estimate');
-    const distanceInput = document.getElementById('distanceKm');
-    const durationInput = document.getElementById('durationSec');
-    const distanceDisplay = document.getElementById('distanceDisplay');
-    const timeDisplay = document.getElementById('timeDisplay');
-    document.getElementById('year').textContent = new Date().getFullYear();
+    const form=document.getElementById('booking-form'),estimateEl=document.getElementById('estimate'),distanceInput=document.getElementById('distanceKm'),durationInput=document.getElementById('durationSec'),distanceDisplay=document.getElementById('distanceDisplay'),timeDisplay=document.getElementById('timeDisplay');
+    document.getElementById('year').textContent=new Date().getFullYear();
+    function estimateFare(km){var d=Math.max(0,Number(km)||0);return d<=7?20:20+(d-7)*1.6;}
+    function formatEUR(n){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n);}
+    function formatDuration(seconds){const s=Math.max(0,Number(seconds)||0);const h=Math.floor(s/3600);const m=Math.round((s%3600)/60);return h>0?`${h} h ${m} min`:`${m} min`;}
 
-    function estimateFare(km){ var d=Math.max(0, Number(km)||0); return d<=7?20:20+(d-7)*1.6; }
-    function formatEUR(n){ return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n); }
-    function formatDuration(seconds){
-      const s = Math.max(0, Number(seconds)||0);
-      const h = Math.floor(s/3600);
-      const m = Math.round((s%3600)/60);
-      return h>0 ? `${h} h ${m} min` : `${m} min`;
+    const floatBox=document.getElementById('floating-quote');
+    const floatPrice=document.getElementById('floatPrice');
+    const floatDist=document.getElementById('floatDist');
+    const floatDur=document.getElementById('floatDur');
+    floatBox.querySelector('button.close').addEventListener('click',()=>floatBox.classList.remove('show'));
+    function updateFloatingPanel(km,sec){
+      const price=estimateFare(km);
+      floatPrice.textContent=formatEUR(price);
+      floatDist.textContent=`${km.toFixed(1)} km`;
+      floatDur.textContent=formatDuration(sec);
+      floatBox.classList.add('show');
     }
 
-    form.addEventListener('submit', async (e)=>{
+    form.addEventListener('submit',async e=>{
       e.preventDefault();
-      if(!form.checkValidity()){ form.reportValidity(); return; }
-
-      const hp = form.querySelector('input[name="website"]');
-      if (hp && hp.value) { alert('Erreur d’envoi.'); return; }
-
-      const km = Number(String((distanceInput.value||'0')).replace(',','.'));
-      form.querySelector('input[name="estimatePrice"]').value = estimateFare(km).toFixed(2);
-
-      try {
-        const res = await emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form);
-        if(res.status === 200){
+      if(!form.checkValidity()){form.reportValidity();return;}
+      const hp=form.querySelector('input[name="website"]');
+      if(hp&&hp.value){alert('Erreur d’envoi.');return;}
+      const km=Number(String((distanceInput.value||'0')).replace(',','.'));
+      form.querySelector('input[name="estimatePrice"]').value=estimateFare(km).toFixed(2);
+      try{
+        const res=await emailjs.sendForm(SERVICE_ID,TEMPLATE_ID,form);
+        if(res.status===200){
           alert('✅ Votre demande a été envoyée avec succès !');
           form.reset();
-          estimateEl.textContent = '–';
-          distanceDisplay.innerHTML = 'Distance : <span>–</span>';
-          timeDisplay.innerHTML = 'Durée : <span>–</span>';
-          distanceInput.value = '';
-          durationInput.value = '';
+          estimateEl.textContent='–';
+          distanceDisplay.innerHTML='Distance : <span>–</span>';
+          timeDisplay.innerHTML='Durée : <span>–</span>';
+          distanceInput.value='';
+          durationInput.value='';
+          floatBox.classList.remove('show');
         } else {
           throw new Error('Réponse inattendue');
         }
-      } catch(err){
+      }catch(err){
         alert("❌ Envoi impossible : " + (err?.text || err?.message || err));
       }
     });
-  </script>
 
-  <script>
+    // Google Maps + calculs
     let gm = { map:null, directionsService:null, directionsRenderer:null };
     function initMaps(){
       const originInput = document.getElementById('from');
@@ -334,6 +358,7 @@
       const destAC   = new google.maps.places.Autocomplete(destInput, acOptions);
       originAC.addListener('place_changed', updateRoute);
       destAC.addListener('place_changed', updateRoute);
+
       function updateRoute(){
         const o = originInput.value?.trim();
         const d = destInput.value?.trim();
@@ -342,21 +367,23 @@
           origin:o, destination:d, travelMode:google.maps.TravelMode.DRIVING
         }).then(res=>{
           gm.directionsRenderer.setDirections(res);
-          const leg=res.routes?.[0]?.legs?.[0];
-          if(!leg)return;
-          const km=leg.distance.value/1000;
-          const sec=leg.duration.value;
-          distanceInput.value=km.toFixed(1);
-          durationInput.value=sec;
-          estimateEl.textContent=formatEUR(estimateFare(km));
-          distanceDisplay.innerHTML=`Distance : <span>${km.toFixed(1)}</span> km`;
-          timeDisplay.innerHTML=`Durée : <span>${formatDuration(sec)}</span>`;
-          form.querySelector('input[name="estimatePrice"]').value=estimateFare(km).toFixed(2);
+          const leg = res.routes?.[0]?.legs?.[0];
+          if(!leg) return;
+          const km  = leg.distance.value / 1000;
+          const sec = leg.duration.value;
+          distanceInput.value = km.toFixed(1);
+          durationInput.value = sec;
+          estimateEl.textContent = formatEUR(estimateFare(km));
+          distanceDisplay.innerHTML = `Distance : <span>${km.toFixed(1)}</span> km`;
+          timeDisplay.innerHTML = `Durée : <span>${formatDuration(sec)}</span>`;
+          form.querySelector('input[name="estimatePrice"]').value = estimateFare(km).toFixed(2);
+          updateFloatingPanel(km, sec);
         }).catch(err=>console.warn(err));
       }
     }
   </script>
 
+  <!-- API Google Maps -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
 </body>
-</html>
+</html>        <div style="margin-top:12px;"><label for="to">Adresse d'arrivée</label><input id="to" name="to" required placeholder="Adresse d'arrivée" /></div>
