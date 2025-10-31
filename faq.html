@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FAQ – Express VTC 66</title>
+  <meta name="description" content="Questions fréquentes sur les réservations, paiements, horaires, enfants, animaux et zones desservies par Express VTC 66." />
+  <link rel="icon" href="/favicon.ico" />
+
+  <style>
+    :root { 
+      --bg:#0f3d33; 
+      --card:#0e372f; 
+      --text:#efe7d5; 
+      --muted:rgba(255,255,255,.12);
+      --price:#ff6a00;
+      --btn-green:#146b54;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin:0; }
+    body {
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .container { max-width:900px; margin-inline:auto; padding-inline:16px; }
+    header { text-align:center; padding:24px 0 12px; }
+    header img { height:96px; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); }
+
+    /* Boutons */
+    .btn-small {
+      display:inline-block;
+      padding:6px 14px;
+      border-radius:10px;
+      font-size:14px;
+      font-weight:600;
+      background: var(--btn-green);
+      border: 1.5px solid var(--price);
+      color: var(--text);
+      transition: all .25s ease;
+    }
+    .btn-small:hover {
+      box-shadow: 0 0 6px rgba(255,106,0,0.5);
+      transform: translateY(-1px);
+      filter: brightness(1.1);
+    }
+
+    .faq-section { padding:40px 0; text-align:center; }
+    .faq-section h2 { font-size:28px; margin-bottom:32px; }
+    .faq-item {
+      background: var(--card);
+      border: 1px solid var(--muted);
+      border-radius: 18px;
+      padding:20px;
+      text-align:left;
+      margin-bottom:16px;
+    }
+    .faq-item h3 {
+      font-size:18px;
+      margin:0 0 8px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .faq-item p { margin:0; opacity:0.9; }
+    footer {
+      padding:20px 24px;
+      text-align:center;
+      font-size:13px;
+      opacity:.75;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="container">
+    <img src="LOGO EVTC66.jpg" alt="Logo Express VTC 66" />
+    <h1>Express VTC 66</h1>
+    <p><strong>Votre chauffeur à Perpignan</strong></p>
+  </header>
+
+  <main class="container">
+    <section class="faq-section">
+      <h2>Foire Aux Questions (FAQ)</h2>
+
+      <div class="faq-item">
+        <h3>📅 Peut-on réserver à l'avance ?</h3>
+        <p>Oui, vous pouvez réserver votre course à l'avance via notre site, par téléphone ou WhatsApp.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>💳 Quels moyens de paiement acceptez-vous ?</h3>
+        <p>Nous acceptons les paiements en espèces, par carte bancaire et via certains services mobiles.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>⏰ Êtes-vous disponible 24h/24 ?</h3>
+        <p>Oui, notre service est disponible 7j/7 et sur demande, y compris de nuit.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>🧒 Acceptez-vous les enfants et animaux ?</h3>
+        <p>Oui, nous acceptons les enfants accompagnés. Les animaux sont également les bienvenus s’ils sont transportés en toute sécurité.</p>
+      </div>
+
+      <div class="faq-item">
+        <h3>📍 Quels lieux desservez-vous ?</h3>
+        <p>Nous desservons Perpignan et sa région : Canet, Argelès, Le Barcarès, Narbonne, ainsi que les aéroports et gares régionales.</p>
+      </div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <a class="btn-small" href="/">🔙 Retour à l’accueil</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© <span id="year"></span> Express VTC 66 · Chauffeur privé à Perpignan</p>
+      <p>SIREN 925008690 · <a href="mailto:contact@evtc66.fr">contact@evtc66.fr</a> · <a href="tel:+33685618983">+33 6 85 61 89 83</a></p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
