@@ -20,7 +20,7 @@
     }
 
     * { box-sizing: border-box; }
-    html, body { height: 100%; scroll-behavior:smooth; }
+    html, body { height: 100%; }
     body { 
       margin:0; 
       font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; 
@@ -108,7 +108,6 @@
       animation: fadeInUp 1.2s ease-out forwards;
     }
 
-    /* --- Animation d’apparition fluide pour les liens sous la map --- */
     .appear {
       opacity: 0;
       transform: translateY(12px);
@@ -126,13 +125,6 @@
       -webkit-text-fill-color: #fff !important;
       background: none !important;
     }
-
-    /* Petits ajustements pour la section Contact */
-    .contact-grid { display:grid; gap:16px; }
-    @media (min-width:768px){ .contact-grid{ grid-template-columns: 1fr 1fr; } }
-    .contact-list { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
-    .contact-list li a { display:inline-flex; gap:8px; align-items:center; border-bottom:1px dashed transparent; }
-    .contact-list li a:hover { border-bottom-color: currentColor; }
   </style>
 </head>
 <body>
@@ -236,39 +228,9 @@
         </form>
       </div>
     </section>
-
-    <!-- ========= SECTION CONTACT ========= -->
-    <section id="contact" class="section" aria-labelledby="titre-contact">
-      <h2 id="titre-contact">Contact</h2>
-      <p class="muted">Disponible 24/7 à Perpignan et toutes distances</p>
-
-      <div class="grid contact-grid" style="max-width:900px; margin: 24px auto 0;">
-        <div class="card">
-          <h3 style="margin-top:0;">Nous joindre rapidement</h3>
-          <ul class="contact-list">
-            <li><a href="tel:+33685618983">📞 +33 6 85 61 89 83</a></li>
-            <li><a href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">💬 WhatsApp</a></li>
-            <li><a href="sms:+33685618983">✉️ SMS</a></li>
-            <li><a href="mailto:contact@evtc66.fr">📧 contact@evtc66.fr</a></li>
-          </ul>
-        </div>
-
-        <div class="card">
-          <h3 style="margin-top:0;">Infos légales & zone</h3>
-          <p class="muted" style="margin:0;">SIREN 925008690</p>
-          <p style="margin:8px 0 0;">Perpignan · Aéroports, gares, longues distances</p>
-          <p class="muted" style="margin:8px 0 0;">CB à bord · Lien CB sécurisé · Espèces</p>
-          <div style="margin-top:12px; display:flex; gap:12px; flex-wrap:wrap;">
-            <a class="btn" href="tel:+33685618983">Appeler</a>
-            <a class="btn" href="#titre-reservation">Demander un devis</a>
-          </div>
-        </div>
-      </div>
-    </section>
-    <!-- ========= /SECTION CONTACT ========= -->
   </main>
 
-  <!-- Liens : avec Contact à côté de FAQ et Qui sommes-nous -->
+  <!-- Liens du bas avec Contact qui ouvre contact.html -->
   <div class="text-links appear" style="margin: 40px auto; text-align:center;">
     <a href="/services.html">Nos services</a>
     <span>•</span>
@@ -276,7 +238,7 @@
     <span>•</span>
     <a href="/qui-sommes-nous.html">Qui sommes-nous</a>
     <span>•</span>
-    <a href="#contact">Contact</a>
+    <a href="/contact.html">Contact</a>
   </div>
 
   <footer>
@@ -383,7 +345,7 @@
     }
   </script>
 
-  <!-- IMPORTANT : URL COMPLÈTE DE L'API MAPS -->
+  <!-- Google Maps -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
 </body>
-</html>
+</html
