@@ -34,7 +34,6 @@
     header { text-align:center; padding:24px 0 12px; }
     header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
 
-    /* --- Boutons généraux --- */
     .btn {
       display:inline-block;
       padding:12px 18px;
@@ -49,7 +48,6 @@
     .btn:hover { box-shadow: 0 0 10px rgba(255,106,0,0.6); transform: translateY(-1px); filter: brightness(1.1); }
     .btn:active { transform: translateY(1px); filter: brightness(0.95); }
 
-    /* --- Bouton Envoyer (plus gros) --- */
     .btn-accent {
       background:linear-gradient(180deg,#ff8c00 0%,var(--price) 50%,#cc5200 100%);
       color:#fff;
@@ -64,8 +62,14 @@
     .btn-accent:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-accent:active { transform: translateY(2px); filter: brightness(0.95); }
 
-    /* --- Liens texte pour Services / FAQ / Qui sommes-nous --- */
-    .text-links { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:10px; font-size:14px; }
+    .text-links { 
+      display:flex; 
+      gap:14px; 
+      justify-content:center; 
+      flex-wrap:wrap; 
+      margin-top:10px; 
+      font-size:14px; 
+    }
     .text-links a { border-bottom:1px dashed transparent; }
     .text-links a:hover { border-bottom-color: currentColor; }
 
@@ -104,6 +108,14 @@
       animation: fadeInUp 1.2s ease-out forwards;
     }
 
+    /* --- Animation d’apparition fluide pour les liens sous la map --- */
+    .appear {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: fadeInUp 1.2s ease-out forwards;
+      animation-delay: 0.5s;
+    }
+
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
@@ -127,15 +139,6 @@
       <a class="btn" href="tel:+33685618983">Appeler</a>
       <a class="btn" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
       <a class="btn" href="sms:+33685618983">SMS</a>
-    </div>
-
-    <!-- Liens texte simples -->
-    <div class="text-links">
-      <a href="/services.html">Nos services</a>
-      <span>•</span>
-      <a href="/faq.html">FAQ</a>
-      <span>•</span>
-      <a href="/qui-sommes-nous.html">Qui sommes-nous</a>
     </div>
   </header>
 
@@ -223,6 +226,15 @@
 
           <div class="map-title">Visualisez votre itinéraire sur la carte ci-dessous</div>
           <div id="map" aria-label="Carte de l'itinéraire"></div>
+
+          <!-- Liens texte déplacés ici avec animation -->
+          <div class="text-links appear" style="margin-top:20px;">
+            <a href="/services.html">Nos services</a>
+            <span>•</span>
+            <a href="/faq.html">FAQ</a>
+            <span>•</span>
+            <a href="/qui-sommes-nous.html">Qui sommes-nous</a>
+          </div>
         </form>
       </div>
     </section>
@@ -332,5 +344,4 @@
     }
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCRjafaTzuaJVJsU2ltyKaiAyU8VhY_CaQ&libraries=places&callback=initMaps" async defer></script>
-</body>
-</html>
+</body
