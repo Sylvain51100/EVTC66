@@ -3,125 +3,87 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Services – Express VTC 66</title>
-  <meta name="description" content="Nos services : transferts aéroports & gares, mise à disposition, trajets locaux & longues distances, déplacements professionnels, paiement simplifié." />
+  <title>Nos services – Express VTC 66</title>
+  <meta name="description" content="Express VTC 66 – Page services épurée." />
   <link rel="icon" href="/favicon.ico" />
+  <meta name="robots" content="index, follow" />
 
   <style>
-    :root { 
-      --bg:#0f3d33; 
-      --card:#0e372f; 
-      --text:#efe7d5; 
+    :root {
+      /* LÉGÈREMENT moins vert que la home pour signaler le changement de page */
+      --bg:#154a3d;       /* home = #0f3d33 */
+      --text:#efe7d5;
       --muted:rgba(255,255,255,.12);
-      --price:#ff6a00;
       --btn-green:#146b54;
+      --price:#ff6a00;
     }
 
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body { 
-      margin:0; 
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; 
-      background: var(--bg); 
-      color: var(--text); 
-      line-height:1.5; 
+    body {
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height:1.5;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
     }
 
-    a { color: inherit; text-decoration: none; }
-    .container { max-width:1100px; margin-inline:auto; padding-inline:16px; }
-    header { text-align:center; padding:24px 0 12px; }
-    header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
+    .container { max-width: 900px; margin-inline:auto; padding-inline:16px; }
 
-    .btn {
+    header { text-align:center; padding:28px 0 6px; }
+    header img { height:96px; width:auto; border-radius:14px; box-shadow:0 0 10px rgba(0,0,0,.3); object-fit:cover; }
+    h1 { margin:8px 0 0; font-size:28px; font-weight:800; letter-spacing:.2px; }
+
+    /* Bouton retour en bas */
+    .footer-bar {
+      margin-top:auto;              /* pousse le footer en bas */
+      position:sticky;
+      bottom:0;
+      background: rgba(0,0,0,.18);
+      backdrop-filter: blur(6px);
+      border-top:1px solid var(--muted);
+    }
+    .inner { display:flex; justify-content:center; padding:16px; }
+
+    .btn-back {
       display:inline-block;
       padding:12px 18px;
       border-radius:14px;
-      font-weight:700;
-      transition: all .25s ease;
+      font-weight:800;
+      text-decoration:none;
       background: var(--btn-green);
       border: 2px solid var(--price);
       color: var(--text);
-      box-shadow: 0 0 0 rgba(255,106,0,0);
+      transition: all .25s ease;
+      box-shadow:0 0 0 rgba(255,106,0,0);
     }
-    .btn:hover {
-      box-shadow: 0 0 10px rgba(255,106,0,0.6);
-      transform: translateY(-1px);
-      filter: brightness(1.1);
-    }
+    .btn-back:hover { box-shadow:0 0 10px rgba(255,106,0,.6); transform: translateY(-1px); filter: brightness(1.06); }
+    .btn-back:active { transform: translateY(1px); filter: brightness(.96); }
 
-    .card{ background:var(--card); border:1px solid var(--muted); border-radius:20px; padding:24px; }
-    .section{ padding:32px 0; text-align:center; }
-    .muted{ opacity:.8; }
-
-    /* Spécifique à la page Services */
-    .services-wrap{ max-width:760px; margin:0 auto; text-align:left; }
-    .service-item { background: var(--card); border:1px solid var(--muted); border-radius:18px; padding:18px; margin-bottom:14px; }
-    .service-item h3 { margin:0 0 6px; font-size:20px; display:flex; align-items:center; gap:8px; }
-    .service-item p { margin:0; }
-    .page-title { text-align:center; font-size:28px; margin:0 0 18px; }
-    .back { display:inline-flex; align-items:center; gap:8px; }
+    /* Accessibilité */
+    .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   </style>
 </head>
 <body>
+  <a class="sr-only" href="#retour">Aller au bouton de retour</a>
+
   <header class="container" role="banner">
     <img src="/LOGO EVTC66.jpg" alt="Logo Express VTC 66" loading="eager" />
     <h1>Express VTC 66</h1>
-    <p><strong>Votre chauffeur à Perpignan</strong></p>
-
-    <div style="margin-top:18px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn" href="/">Accueil</a>
-      <a class="btn" href="tel:+33685618983">Appeler</a>
-      <a class="btn" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
-      <a class="btn" href="sms:+33685618983">SMS</a>
-    </div>
+    <!-- Page minimaliste : aucun autre bouton ni contenu -->
   </header>
 
-  <main class="container" role="main">
-    <section class="section services-wrap">
-      <h2 class="page-title">Nos services</h2>
+  <!-- Main volontairement vide -->
+  <main class="container" role="main" aria-label="Page services épurée"></main>
 
-      <article class="service-item">
-        <h3>🚕 Transferts aéroports & gares</h3>
-        <p>Express VTC 66 vous conduit en toute sérénité vers les aéroports et gares de la région, avec ponctualité et professionnalisme.</p>
-      </article>
-
-      <article class="service-item">
-        <h3>🕒 Mise à disposition</h3>
-        <p>Besoin d’un chauffeur pour plusieurs heures ? Nous proposons la mise à disposition d’un véhicule avec chauffeur pour vos rendez-vous professionnels ou événements privés.</p>
-      </article>
-
-      <article class="service-item">
-        <h3>📍 Trajets locaux & longues distances</h3>
-        <p>Que vous alliez à Perpignan ou dans une autre ville de France, nous réalisons vos trajets longue distance sur réservation.</p>
-      </article>
-
-      <article class="service-item">
-        <h3>🧳 Déplacements professionnels</h3>
-        <p>Un service discret, fiable et efficace pour tous vos trajets professionnels, avec ou sans contrat régulier.</p>
-      </article>
-
-      <article class="service-item">
-        <h3>💳 Paiement simplifié</h3>
-        <p>Paiement en espèces, carte bancaire ou mobile. Tarifs fixés à l’avance, pas de surprise.</p>
-      </article>
-
-      <p style="text-align:center; margin-top:18px;">
-        <a class="btn back" href="/">
-          <span>🔙</span> <span>Retour à l’accueil</span>
-        </a>
-      </p>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">
-      <p>© <span id="year"></span> Express VTC 66 · Chauffeur privé à Perpignan</p>
-      <p class="muted">SIREN 925008690 · <a href="mailto:contact@evtc66.fr">contact@evtc66.fr</a> · <a href="tel:+33685618983">+33 6 85 61 89 83</a></p>
+  <!-- Bouton de retour en bas uniquement -->
+  <footer class="footer-bar" role="contentinfo">
+    <div class="inner">
+      <a id="retour" class="btn-back" href="/">← Retour à l'accueil</a>
     </div>
   </footer>
-
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
 </body>
 </html>
