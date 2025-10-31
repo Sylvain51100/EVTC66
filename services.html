@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Services – Express VTC 66</title>
+  <meta name="description" content="Nos services : transferts aéroports & gares, mise à disposition, trajets locaux & longues distances, déplacements professionnels, paiement simplifié." />
+  <link rel="canonical" href="https://evtc66.fr/services.html" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    /* Ensure looks great with site palette */
+    .services-wrap{ max-width:760px; margin:0 auto; }
+    .service-item { background: var(--card); border:1px solid var(--muted); border-radius:18px; padding:18px; margin-bottom:14px; }
+    .service-item h3 { margin:0 0 6px; font-size:20px; display:flex; align-items:center; gap:8px; }
+    .service-item p { margin:0; }
+    .page-title { text-align:center; font-size:28px; margin:0 0 18px; }
+    .back { display:inline-flex; align-items:center; gap:8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container site-top">
+      <a class="brand" href="/">
+        <img src="/LOGO%20EVTC66.jpg" alt="Logo Express VTC 66" height="56" />
+        <h1>Express VTC 66</h1>
+      </a>
+      <nav class="nav" aria-label="Navigation principale">
+        <a href="/services.html" aria-current="page">Services</a>
+        <a href="/faq.html">FAQ</a>
+        <a href="/a-propos.html">À&nbsp;propos</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section services-wrap">
+      <h2 class="page-title">Nos services</h2>
+
+      <article class="service-item">
+        <h3>🚕 Transferts aéroports & gares</h3>
+        <p>Express VTC 66 vous conduit en toute sérénité vers les aéroports et gares de la région, avec ponctualité et professionnalisme.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>🕒 Mise à disposition</h3>
+        <p>Besoin d’un chauffeur pour plusieurs heures ? Nous proposons la mise à disposition d’un véhicule avec chauffeur pour vos rendez-vous professionnels ou événements privés.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>📍 Trajets locaux & longues distances</h3>
+        <p>Que vous alliez à Perpignan ou dans une autre ville de France, nous réalisons vos trajets longue distance sur réservation.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>🧳 Déplacements professionnels</h3>
+        <p>Un service discret, fiable et efficace pour tous vos trajets professionnels, avec ou sans contrat régulier.</p>
+      </article>
+
+      <article class="service-item">
+        <h3>💳 Paiement simplifié</h3>
+        <p>Paiement en espèces, carte bancaire ou mobile. Tarifs fixés à l’avance, pas de surprise.</p>
+      </article>
+
+      <p style="text-align:center; margin-top:18px;">
+        <a class="btn back" href="/">
+          <span>🔙</span> <span>Retour à l’accueil</span>
+        </a>
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© <span id="year"></span> Express VTC 66 · Chauffeur privé à Perpignan</p>
+      <p class="muted">SIREN 925008690 · <a href="mailto:contact@evtc66.fr">contact@evtc66.fr</a> · <a href="tel:+33685618983">+33 6 85 61 89 83</a></p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
