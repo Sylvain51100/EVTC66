@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Express VTC 66 – Chauffeur privé à Perpignan</title>
-  <meta name="description" content="Réservez votre trajet avec Express VTC 66 à Perpignan. Chauffeur privé professionnel, estimation automatique, réservation rapide et paiement CB ou espèces." />
+  <title>Express VTC 66 – Chauffeur VTC à Perpignan et sur toutes distances</title>
+  <meta name="description" content="Réservez votre chauffeur VTC à Perpignan avec Express VTC 66. Estimation immédiate, réservation en quelques clics, service fiable 24h/24, paiement CB ou espèces." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://evtc66.fr/" />
   <link rel="icon" href="/favicon.ico" />
@@ -138,68 +138,101 @@
       visibility: hidden !important;
     }
 
-    #floating-quote{
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      z-index: 1000;
-      width: 260px;
-      background: var(--card);
-      border: 1px solid var(--muted);
-      border-radius: 16px;
-      padding: 14px 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      display: none;
+    /* ========= BANDEAU ESTIMATION (full-width, sticky top) ========= */
+    #fare-banner {
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      width: 100%;
+      background: #0f3d33cc; /* léger translucide pour rester dans le thème */
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--muted);
+      box-shadow: 0 6px 16px rgba(0,0,0,.10);
+      transform: translateY(-8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .2s ease, opacity .2s ease;
     }
-    #floating-quote.show{ display: block; }
-    #floating-quote .title{ font-size: 12px; opacity: .8; margin-bottom: 6px; text-align: left; }
-    #floating-quote .price{
-      font-size: 22px;
-      font-weight: 900;
-      line-height: 1.1;
-      margin-bottom: 8px;
-      background: linear-gradient(180deg,#ff8c00 0%, var(--price) 50%, #cc5200 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    #fare-banner.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
     }
-    #floating-quote .line{ font-size: 14px; opacity: .9; }
-    #floating-quote button.close{
-      appearance: none;
-      border: none;
-      background: transparent;
-      color: var(--text);
-      opacity: .7;
-      font-size: 18px;
-      line-height: 1;
-      cursor: pointer;
-      position: absolute;
-      top: 8px; right: 10px;
+    .fare-banner__inner {
+      max-width: 1100px; /* aligné à .container */
+      margin: 0 auto;
+      display: grid;
+      align-items: center;
+      gap: .75rem;
+      grid-template-columns: 1fr auto auto auto auto;
+      padding: .6rem 16px;
     }
-    #floating-quote button.close:hover{ opacity: 1; }
-    @media (max-width: 480px){
-      #floating-quote{ left: 12px; right: 12px; width: auto; }
+    .fare-banner__route { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fare-banner__arrow { margin: 0 .4rem; opacity: .8; }
+    .fare-banner__meta { font-size: .95rem; opacity:.9; }
+    .fare-banner__price { font-size: 1.2rem; font-weight: 900; background: linear-gradient(180deg,#ff8c00 0%, var(--price) 50%, #cc5200 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
+    .fare-banner__actions { display:flex; align-items:center; gap:.5rem; }
+    .fare-banner__close { border:0; background:transparent; color:var(--text); font-size:20px; line-height:1; padding:.25rem .4rem; cursor:pointer; opacity:.7; }
+    .fare-banner__close:hover { opacity:1; }
+
+    @media (max-width: 720px) {
+      .fare-banner__inner {
+        grid-template-columns: 1fr auto auto;
+        grid-template-areas:
+          "route price close"
+          "meta actions actions";
+        row-gap: .35rem;
+      }
+      .fare-banner__route   { grid-area: route; }
+      .fare-banner__meta    { grid-area: meta; }
+      .fare-banner__price   { grid-area: price; justify-self: end; }
+      .fare-banner__actions { grid-area: actions; justify-self: start; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      #fare-banner { transition: none; }
+    }
+    /* ========= FIN BANDEAU ========= */
+
   </style>
 </head>
 <body>
+  <!-- BANDEAU ESTIMATION EN HAUT (full-width, sticky) -->
+  <div id="fare-banner" role="region" aria-label="Estimation de tarif" aria-live="polite" aria-atomic="true">
+    <div class="fare-banner__inner">
+      <div class="fare-banner__route">
+        <strong id="fb-from">—</strong><span class="fare-banner__arrow">→</span><strong id="fb-to">—</strong>
+      </div>
+      <div class="fare-banner__meta">
+        <span id="fb-distance">— km</span> <span class="sep">•</span> <span id="fb-duration">— min</span>
+      </div>
+      <div class="fare-banner__price" id="fb-price">— €</div>
+      <div class="fare-banner__actions">
+        <!-- Tu peux mettre tes propres classes si tu veux un rendu différent, sinon on reste discret -->
+        <button type="button" id="fb-book" class="btn">Réserver ce trajet</button>
+        <button type="button" id="fb-copy" class="btn">Copier</button>
+        <button type="button" id="fb-close" class="fare-banner__close" aria-label="Masquer l’estimation">×</button>
+      </div>
+    </div>
+  </div>
+
   <header class="container" role="banner">
     <img src="LOGO EVTC66.jpg" alt="Logo Express VTC 66" loading="eager" />
     <h1>Express VTC 66</h1>
-    <p><strong>Votre chauffeur à Perpignan</strong></p>
-    <p>Réservation simple en quelques secondes – rapidité et efficacité</p>
+    <p><strong>Chauffeur VTC à Perpignan et sur toutes distances</strong></p>
+    <p>Réservez en quelques secondes — rapide, fiable et disponible 24h/24</p>
 
     <div style="margin-top:38px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap;">
-      <a class="btn btn-large" href="tel:+33685618983">Appeler</a>
-      <a class="btn btn-large" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener">WhatsApp</a>
-      <a class="btn btn-large" href="sms:+33685618983">SMS</a>
+      <a class="btn btn-large" href="tel:+33685618983" aria-label="Appeler Express VTC 66">Appeler</a>
+      <a class="btn btn-large" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener" aria-label="Réserver via WhatsApp">WhatsApp</a>
+      <a class="btn btn-large" href="sms:+33685618983" aria-label="Envoyer un SMS à Express VTC 66">SMS</a>
     </div>
   </header>
 
   <main id="contenu" class="container" role="main">
     <section class="section" aria-labelledby="titre-reservation">
       <h2 id="titre-reservation">Réservation rapide</h2>
-      <p>Remplissez le formulaire ci-dessous et obtenez votre estimation immédiate.</p>
+      <p>Réservez votre chauffeur <strong>en quelques clics</strong> et obtenez <strong>votre tarif immédiat</strong>. Remplissez simplement le formulaire ci-dessous.</p>
 
       <div class="card" style="max-width:560px;margin:auto; text-align:left;">
         <form id="booking-form" novalidate>
@@ -221,7 +254,8 @@
           <div style="margin-top:12px;">
             <label for="to">Adresse d'arrivée (destination)</label>
             <input id="to" name="to" required placeholder="Adresse d'arrivée" />
-          </div><div class="grid grid-2" style="margin-top:12px%;">
+          </div>
+          <div class="grid grid-2" style="margin-top:12px;">
             <div>
               <label for="passengers">Nombre de passagers</label>
               <select id="passengers" name="passengers" required>
@@ -289,36 +323,56 @@
     </div>
   </footer>
 
-  <div id="floating-quote" aria-live="polite" aria-label="Estimation flottante">
-    <button class="close" type="button" aria-label="Fermer">×</button>
-    <div class="title">Votre estimation</div>
-    <div id="floatPrice" class="price">—</div>
-    <div class="line">Distance : <span id="floatDist">—</span></div>
-    <div class="line">Durée : <span id="floatDur">—</span></div>
-  </div>
+  <!-- SUPPRESSION de l'ancienne bulle flottante -->
+  <!-- (on la remplace par le bandeau sticky ci-dessus) -->
 
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     const PUBLIC_KEY="ew-llomHzPc_a5USk",SERVICE_ID="service_ea51htv",TEMPLATE_ID="template_xl3afpn";
     emailjs.init(PUBLIC_KEY);
-    const form=document.getElementById('booking-form'),estimateEl=document.getElementById('estimate'),distanceInput=document.getElementById('distanceKm'),durationInput=document.getElementById('durationSec'),distanceDisplay=document.getElementById('distanceDisplay'),timeDisplay=document.getElementById('timeDisplay');
+    const form=document.getElementById('booking-form'),
+          estimateEl=document.getElementById('estimate'),
+          distanceInput=document.getElementById('distanceKm'),
+          durationInput=document.getElementById('durationSec'),
+          distanceDisplay=document.getElementById('distanceDisplay'),
+          timeDisplay=document.getElementById('timeDisplay');
     document.getElementById('year').textContent=new Date().getFullYear();
     function estimateFare(km){var d=Math.max(0,Number(km)||0);return d<=7?20:20+(d-7)*1.6;}
     function formatEUR(n){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(n);}
     function formatDuration(seconds){const s=Math.max(0,Number(seconds)||0);const h=Math.floor(s/3600);const m=Math.round((s%3600)/60);return h>0?`${h} h ${m} min`:`${m} min`;}
 
-    const floatBox=document.getElementById('floating-quote');
-    const floatPrice=document.getElementById('floatPrice');
-    const floatDist=document.getElementById('floatDist');
-    const floatDur=document.getElementById('floatDur');
-    floatBox.querySelector('button.close').addEventListener('click',()=>floatBox.classList.remove('show'));
-    function updateFloatingPanel(km,sec){
-      const price=estimateFare(km);
-      floatPrice.textContent=formatEUR(price);
-      floatDist.textContent=`${km.toFixed(1)} km`;
-      floatDur.textContent=formatDuration(sec);
-      floatBox.classList.add('show');
+    /* ======== BANDEAU : helpers ======== */
+    const banner = document.getElementById('fare-banner');
+    const fbFrom = document.getElementById('fb-from');
+    const fbTo   = document.getElementById('fb-to');
+    const fbDist = document.getElementById('fb-distance');
+    const fbDur  = document.getElementById('fb-duration');
+    const fbPrice= document.getElementById('fb-price');
+
+    function showFareBanner({ from, to, distanceKm, durationSec, priceEUR }) {
+      fbFrom.textContent = from || 'Départ';
+      fbTo.textContent   = to || 'Arrivée';
+      fbDist.textContent = `${Number(distanceKm).toFixed(1)} km`;
+      fbDur.textContent  = formatDuration(durationSec);
+      fbPrice.textContent= formatEUR(priceEUR);
+      banner.classList.add('show');
     }
+    function hideFareBanner() {
+      banner.classList.remove('show');
+    }
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#fb-book')) {
+        // Ouvre/Scroll vers la section de réservation (déjà sur la page)
+        document.getElementById('contenu')?.scrollIntoView({ behavior:'smooth' });
+      }
+      if (e.target.closest('#fb-copy')) {
+        const text = `Trajet: ${fbFrom.textContent} → ${fbTo.textContent}\nDistance/Durée: ${fbDist.textContent} • ${fbDur.textContent}\nPrix estimé: ${fbPrice.textContent}`;
+        navigator.clipboard.writeText(text).catch(()=>{});
+      }
+      if (e.target.closest('#fb-close')) hideFareBanner();
+    });
+    /* ======== FIN BANDEAU ======== */
 
     form.addEventListener('submit',async e=>{
       e.preventDefault();
@@ -337,7 +391,7 @@
           timeDisplay.innerHTML='Durée : <span>–</span>';
           distanceInput.value='';
           durationInput.value='';
-          floatBox.classList.remove('show');
+          hideFareBanner();
         } else {
           throw new Error('Réponse inattendue');
         }
@@ -379,11 +433,20 @@
           const sec = leg.duration.value;
           distanceInput.value = km.toFixed(1);
           durationInput.value = sec;
-          estimateEl.textContent = formatEUR(estimateFare(km));
+          const price = estimateFare(km);
+          estimateEl.textContent = formatEUR(price);
           distanceDisplay.innerHTML = `Distance : <span>${km.toFixed(1)}</span> km`;
           timeDisplay.innerHTML = `Durée : <span>${formatDuration(sec)}</span>`;
-          form.querySelector('input[name="estimatePrice"]').value = estimateFare(km).toFixed(2);
-          updateFloatingPanel(km, sec);
+          form.querySelector('input[name="estimatePrice"]').value = price.toFixed(2);
+
+          // Affiche / met à jour le bandeau sticky
+          showFareBanner({
+            from: o,
+            to: d,
+            distanceKm: km,
+            durationSec: sec,
+            priceEUR: price
+          });
         }).catch(err=>console.warn(err));
       }
     }
