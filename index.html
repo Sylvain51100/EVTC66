@@ -138,13 +138,13 @@
       visibility: hidden !important;
     }
 
-    /* ========= BANDEAU ESTIMATION (full-width, sticky top) ========= */
+    /* ========= BANDEAU ESTIMATION (full-width, sticky top, PLUS GRAND) ========= */
     #fare-banner {
       position: sticky;
       top: 0;
       z-index: 999;
       width: 100%;
-      background: #0f3d33cc; /* léger translucide pour rester dans le thème */
+      background: #0f3d33e6; /* un peu moins transparent */
       backdrop-filter: blur(6px);
       border-bottom: 1px solid var(--muted);
       box-shadow: 0 6px 16px rgba(0,0,0,.10);
@@ -163,16 +163,31 @@
       margin: 0 auto;
       display: grid;
       align-items: center;
-      gap: .75rem;
-      grid-template-columns: 1fr auto auto auto auto;
-      padding: .6rem 16px;
+      gap: 1rem;
+      grid-template-columns: 1fr auto auto auto; /* route | meta | price | close */
+      padding: 14px 16px; /* plus haut */
+      min-height: 74px;   /* hauteur minimale augmentée */
     }
-    .fare-banner__route { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .fare-banner__arrow { margin: 0 .4rem; opacity: .8; }
-    .fare-banner__meta { font-size: .95rem; opacity:.9; }
-    .fare-banner__price { font-size: 1.2rem; font-weight: 900; background: linear-gradient(180deg,#ff8c00 0%, var(--price) 50%, #cc5200 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; white-space: nowrap; }
-    .fare-banner__actions { display:flex; align-items:center; gap:.5rem; }
-    .fare-banner__close { border:0; background:transparent; color:var(--text); font-size:20px; line-height:1; padding:.25rem .4rem; cursor:pointer; opacity:.7; }
+    .fare-banner__route {
+      font-size: 1.1rem; 
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+      font-weight: 700;
+    }
+    .fare-banner__arrow { margin: 0 .5rem; opacity: .85; }
+    .fare-banner__meta { font-size: 1rem; opacity:.95; white-space: nowrap; }
+    .fare-banner__price { 
+      font-size: 1.4rem; 
+      font-weight: 900; 
+      background: linear-gradient(180deg,#ff8c00 0%, var(--price) 50%, #cc5200 100%); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      white-space: nowrap; 
+    }
+    .fare-banner__close { 
+      border:0; background:transparent; color:var(--text); 
+      font-size:24px; line-height:1; padding:.25rem .4rem; 
+      cursor:pointer; opacity:.75; 
+    }
     .fare-banner__close:hover { opacity:1; }
 
     @media (max-width: 720px) {
@@ -180,13 +195,13 @@
         grid-template-columns: 1fr auto auto;
         grid-template-areas:
           "route price close"
-          "meta actions actions";
-        row-gap: .35rem;
+          "meta  meta  meta";
+        row-gap: .4rem;
       }
       .fare-banner__route   { grid-area: route; }
       .fare-banner__meta    { grid-area: meta; }
       .fare-banner__price   { grid-area: price; justify-self: end; }
-      .fare-banner__actions { grid-area: actions; justify-self: start; }
+      /* close reste à droite */
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -197,22 +212,17 @@
   </style>
 </head>
 <body>
-  <!-- BANDEAU ESTIMATION EN HAUT (full-width, sticky) -->
+  <!-- BANDEAU ESTIMATION EN HAUT (full-width, sticky, sans boutons d'action) -->
   <div id="fare-banner" role="region" aria-label="Estimation de tarif" aria-live="polite" aria-atomic="true">
     <div class="fare-banner__inner">
       <div class="fare-banner__route">
         <strong id="fb-from">—</strong><span class="fare-banner__arrow">→</span><strong id="fb-to">—</strong>
       </div>
       <div class="fare-banner__meta">
-        <span id="fb-distance">— km</span> <span class="sep">•</span> <span id="fb-duration">— min</span>
+        <span id="fb-distance">— km</span> <span class="sep">•</span> <span id="fb-duration">—</span>
       </div>
       <div class="fare-banner__price" id="fb-price">— €</div>
-      <div class="fare-banner__actions">
-        <!-- Tu peux mettre tes propres classes si tu veux un rendu différent, sinon on reste discret -->
-        <button type="button" id="fb-book" class="btn">Réserver ce trajet</button>
-        <button type="button" id="fb-copy" class="btn">Copier</button>
-        <button type="button" id="fb-close" class="fare-banner__close" aria-label="Masquer l’estimation">×</button>
-      </div>
+      <button type="button" id="fb-close" class="fare-banner__close" aria-label="Masquer l’estimation">×</button>
     </div>
   </div>
 
@@ -323,9 +333,6 @@
     </div>
   </footer>
 
-  <!-- SUPPRESSION de l'ancienne bulle flottante -->
-  <!-- (on la remplace par le bandeau sticky ci-dessus) -->
-
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script>
     const PUBLIC_KEY="ew-llomHzPc_a5USk",SERVICE_ID="service_ea51htv",TEMPLATE_ID="template_xl3afpn";
@@ -362,14 +369,6 @@
     }
 
     document.addEventListener('click', (e) => {
-      if (e.target.closest('#fb-book')) {
-        // Ouvre/Scroll vers la section de réservation (déjà sur la page)
-        document.getElementById('contenu')?.scrollIntoView({ behavior:'smooth' });
-      }
-      if (e.target.closest('#fb-copy')) {
-        const text = `Trajet: ${fbFrom.textContent} → ${fbTo.textContent}\nDistance/Durée: ${fbDist.textContent} • ${fbDur.textContent}\nPrix estimé: ${fbPrice.textContent}`;
-        navigator.clipboard.writeText(text).catch(()=>{});
-      }
       if (e.target.closest('#fb-close')) hideFareBanner();
     });
     /* ======== FIN BANDEAU ======== */
@@ -439,7 +438,7 @@
           timeDisplay.innerHTML = `Durée : <span>${formatDuration(sec)}</span>`;
           form.querySelector('input[name="estimatePrice"]').value = price.toFixed(2);
 
-          // Affiche / met à jour le bandeau sticky
+          // Affiche / met à jour le bandeau sticky (rappel)
           showFareBanner({
             from: o,
             to: d,
