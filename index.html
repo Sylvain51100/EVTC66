@@ -21,9 +21,12 @@
 
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; padding: 0; }
-    body { 
+    body{ 
       font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif; 
-      background: var(--bg); 
+      /* Fond: dégradé radial doux + dégradé vertical (option validée) */
+      background:
+        radial-gradient(1200px 500px at 50% -100px, rgba(255,255,255,0.08), transparent 70%),
+        linear-gradient(180deg, #114237 0%, #0f3d33 60%, #0c322b 100%);
       color: var(--text); 
       line-height:1.5; 
       overflow-x: hidden;
@@ -209,6 +212,43 @@
     }
     /* ========= FIN BANDEAU ========= */
 
+    /* ===== Boutons du hero (alignement parfait + mobile) ===== */
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 38px;
+    }
+    .hero-actions .btn.btn-large {
+      min-width: 160px;
+      text-align: center;
+      flex: 1 1 auto;
+      min-height: 56px; /* pour une hauteur identique */
+      display: flex; align-items: center; justify-content: center;
+    }
+    @media (max-width: 520px) {
+      .hero-actions { flex-direction: column; gap: 14px; }
+      .hero-actions .btn.btn-large { width: 100%; max-width: 320px; }
+    }
+
+    /* ===== Correctifs mobile (iOS) : champs date/heure qui débordent ===== */
+    .grid > * { min-width: 0; }                 /* autorise le shrink des colonnes */
+    input, select, textarea { max-width: 100%; }
+    input[type="date"], input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      min-width: 0;
+    }
+    input[type="date"]::-webkit-date-and-time-value,
+    input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+
+    /* Évite le zoom iOS à l’ouverture du clavier (lisibilité) */
+    @media (max-width: 480px) {
+      input, select, textarea { font-size: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -232,7 +272,8 @@
     <p><strong>Chauffeur VTC à Perpignan et sur toutes distances</strong></p>
     <p>Réservez en quelques secondes — rapide, fiable et disponible 24h/24</p>
 
-    <div style="margin-top:38px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap;">
+    <!-- Boutons du hero (wrapper propre) -->
+    <div class="hero-actions">
       <a class="btn btn-large" href="tel:+33685618983" aria-label="Appeler Express VTC 66">Appeler</a>
       <a class="btn btn-large" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener" aria-label="Réserver via WhatsApp">WhatsApp</a>
       <a class="btn btn-large" href="sms:+33685618983" aria-label="Envoyer un SMS à Express VTC 66">SMS</a>
