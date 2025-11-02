@@ -141,13 +141,13 @@
       visibility: hidden !important;
     }
 
-    /* ========= BANDEAU ESTIMATION (sticky) ========= */
+    /* ========= BANDEAU ESTIMATION (full-width, sticky top, PLUS GRAND) ========= */
     #fare-banner {
       position: sticky;
       top: 0;
       z-index: 999;
       width: 100%;
-      background: #0f3d33e6;
+      background: #0f3d33e6; /* un peu moins transparent */
       backdrop-filter: blur(6px);
       border-bottom: 1px solid var(--muted);
       box-shadow: 0 6px 16px rgba(0,0,0,.10);
@@ -162,14 +162,14 @@
       pointer-events: auto;
     }
     .fare-banner__inner {
-      max-width: 1100px;
+      max-width: 1100px; /* aligné à .container */
       margin: 0 auto;
       display: grid;
       align-items: center;
       gap: 1rem;
       grid-template-columns: 1fr auto auto auto; /* route | meta | price | close */
-      padding: 14px 16px;
-      min-height: 74px;
+      padding: 14px 16px; /* plus haut */
+      min-height: 74px;   /* hauteur minimale augmentée */
     }
     .fare-banner__route {
       font-size: 1.1rem; 
@@ -204,15 +204,55 @@
       .fare-banner__route   { grid-area: route; }
       .fare-banner__meta    { grid-area: meta; }
       .fare-banner__price   { grid-area: price; justify-self: end; }
+      /* close reste à droite */
     }
 
+    @media (prefers-reduced-motion: reduce) {
+      #fare-banner { transition: none; }
+    }
+    /* ========= FIN BANDEAU ========= */
+
+    /* ===== Boutons du hero (alignement parfait + mobile) ===== */
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 38px;
+    }
+    .hero-actions .btn.btn-large {
+      min-width: 160px;
+      text-align: center;
+      flex: 1 1 auto;
+      min-height: 56px; /* pour une hauteur identique */
+      display: flex; align-items: center; justify-content: center;
+    }
+    @media (max-width: 520px) {
+      .hero-actions { flex-direction: column; gap: 14px; }
+      .hero-actions .btn.btn-large { width: 100%; max-width: 320px; }
+    }
+
+    /* ===== Correctifs mobile (iOS) : champs date/heure qui débordent ===== */
+    .grid > * { min-width: 0; }                 /* autorise le shrink des colonnes */
+    input, select, textarea { max-width: 100%; }
+    input[type="date"], input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      min-width: 0;
+    }
+    input[type="date"]::-webkit-date-and-time-value,
+    input[type="time"]::-webkit-date-and-time-value { text-align: left; }
+
+    /* Évite le zoom iOS à l’ouverture du clavier (lisibilité) */
     @media (max-width: 480px) {
       input, select, textarea { font-size: 16px; }
     }
   </style>
 </head>
 <body>
-  <!-- BANDEAU ESTIMATION EN HAUT -->
+  <!-- BANDEAU ESTIMATION EN HAUT (full-width, sticky, sans boutons d'action) -->
   <div id="fare-banner" role="region" aria-label="Estimation de tarif" aria-live="polite" aria-atomic="true">
     <div class="fare-banner__inner">
       <div class="fare-banner__route">
@@ -232,6 +272,7 @@
     <p><strong>Chauffeur VTC à Perpignan et sur toutes distances</strong></p>
     <p>Réservez en quelques secondes — rapide, fiable et disponible 24h/24</p>
 
+    <!-- Boutons du hero (wrapper propre) -->
     <div class="hero-actions">
       <a class="btn btn-large" href="tel:+33685618983" aria-label="Appeler Express VTC 66">Appeler</a>
       <a class="btn btn-large" href="https://wa.me/33685618983?text=Bonjour%20je%20souhaite%20r%C3%A9server%20un%20trajet" target="_blank" rel="noopener" aria-label="Réserver via WhatsApp">WhatsApp</a>
