@@ -1,0 +1,11 @@
+# Fichier robots.txt pour Express VTC 66
+# Autorise l'exploration complète du site et indique le sitemap à Google, Bing, etc.
+
+User-agent: *
+Allow: /
+
+# Lien vers le sitemap XML
+Sitemap: https://evtc66.fr/sitemap.xml
+
+# Hôte principal du site
+Host: https://evtc66.fr
