@@ -5,8 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Qui sommes-nous – Express VTC 66</title>
   <meta name="description" content="Qui sommes-nous ? Express VTC 66 : transport de personnes à Perpignan et dans la région. Service fiable, ponctuel et sécurisé, à l’écoute de vos besoins." />
-  <link rel="icon" href="/favicon.ico" />
   <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://evtc66.fr/qui-sommes-nous.html" />
+  <link rel="icon" href="/favicon.ico" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:title" content="Qui sommes-nous – Express VTC 66">
+  <meta property="og:description" content="Transport de personnes à Perpignan : service fiable, ponctuel et sécurisé.">
+  <meta property="og:url" content="https://evtc66.fr/qui-sommes-nous.html">
+  <meta property="og:image" content="https://evtc66.fr/og-image.jpg">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Qui sommes-nous – Express VTC 66">
+  <meta name="twitter:description" content="Chauffeur privé à Perpignan : fiabilité, ponctualité, sécurité.">
+  <meta name="twitter:image" content="https://evtc66.fr/og-image.jpg">
 
   <style>
     :root {
@@ -88,6 +103,84 @@
 
     .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   </style>
+
+  <!-- JSON-LD LocalBusiness / TaxiService (invisible) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TaxiService",
+    "name":"Express VTC 66",
+    "url":"https://evtc66.fr/",
+    "telephone":"+33685618983",
+    "priceRange":"€€",
+    "areaServed":[
+      {"@type":"City","name":"Perpignan"},
+      {"@type":"AdministrativeArea","name":"Pyrénées-Orientales"}
+    ],
+    "address":{"@type":"PostalAddress","addressLocality":"Perpignan","addressCountry":"FR"},
+    "openingHoursSpecification":[
+      {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],"opens":"00:00","closes":"23:59"}
+    ],
+    "paymentAccepted":["Cash","Credit Card"],
+    "availableService":[
+      {"@type":"Service","name":"Transferts gare & aéroport"},
+      {"@type":"Service","name":"Longue distance"},
+      {"@type":"Service","name":"Mise à disposition"},
+      {"@type":"Service","name":"Courses locales"}
+    ]
+  }
+  </script>
+
+  <!-- JSON-LD WebSite + SearchAction (invisible) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "name":"Express VTC 66",
+    "url":"https://evtc66.fr/",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://evtc66.fr/?q={search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD Service (mots-clés invisibles, y compris fautes courantes) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Service",
+    "serviceType":[
+      "Chauffeur VTC Perpignan",
+      "Chauffeur privé Perpignan",
+      "Chauffeur privée VTC Perpignan",
+      "Taxi Perpignan",
+      "Chauffeur 66",
+      "VTC Perpignan",
+      "VTC Perpigan",
+      "Chauffeur VTC Perpigan"
+    ],
+    "provider":{
+      "@type":"TaxiService",
+      "name":"Express VTC 66",
+      "areaServed":{"@type":"City","name":"Perpignan"},
+      "address":{"@type":"PostalAddress","addressLocality":"Perpignan","addressCountry":"FR"}
+    }
+  }
+  </script>
+
+  <!-- JSON-LD Fil d’Ariane (Breadcrumbs) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"BreadcrumbList",
+    "itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Accueil","item":"https://evtc66.fr/"},
+      {"@type":"ListItem","position":2,"name":"Qui sommes-nous","item":"https://evtc66.fr/qui-sommes-nous.html"}
+    ]
+  }
+  </script>
 </head>
 <body>
   <a class="sr-only" href="#retour">Aller au bouton de retour</a>
